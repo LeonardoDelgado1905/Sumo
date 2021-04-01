@@ -1,0 +1,29 @@
+Metadata-Version: 2.1
+Name: traci
+Version: 1.8.0
+Summary: The pure python version of the TraCI API to communicate with the traffic simulation SUMO
+Home-page: https://sumo.dlr.de/docs/TraCI/Interfacing_TraCI_from_Python.html
+Author: DLR and contributors
+Author-email: sumo@dlr.de
+License: EPL-2.0
+Download-URL: https://sumo.dlr.de/download
+Keywords: traffic simulation traci sumo
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Requires-Dist: sumolib (>=1.8.0)
+
+UNKNOWN
+
+

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>Python</ID>
+  <OriginalElement>#/Users/juanpulido/Documents/cesarTesis/Programa-cruce-convoy-master/dim_sumo</OriginalElement>
+  <nodes>
+    <node x="2008.0" y="170.0">dim_sumo.Log.Log</node>
+    <node x="2372.0" y="260.0">dim_sumo.Message.PriorityRequiredMessage</node>
+    <node x="968.9999999999999" y="260.0">dim_sumo.Message.OppositeLeaderMessage</node>
+    <node x="666.9999999999999" y="260.0">dim_sumo.Message.SlowDownMessage</node>
+    <node x="1768.0" y="170.0">dim_sumo.Message.Message</node>
+    <node x="1318.0" y="260.0">dim_sumo.Message.YieldingNotPossibleMessage</node>
+    <node x="82.0" y="170.0">enum.Enum</node>
+    <node x="2581.0" y="170.0">dim_sumo.Lane.Lane</node>
+    <node x="287.0" y="260.0">dim_sumo.DeceivingVehicle.DeceivingVehicle</node>
+    <node x="2185.0" y="170.0">dim_sumo.SimStateAndConfig.SimStateAndConfig</node>
+    <node x="88.08333333333326" y="80.0">enum.EnumMeta</node>
+    <node x="356.9999999999999" y="170.0">dim_sumo.Vehicle.Vehicle</node>
+    <node x="1706.0" y="260.0">dim_sumo.Message.ResponseFollowerMessage</node>
+    <node x="2070.0" y="260.0">dim_sumo.Message.YieldingMessage</node>
+    <node x="1141.5" y="340.0">dim_sumo.Message.ResponseOppositeLeaderMessage</node>
+    <node x="738.4999999999999" y="340.0">dim_sumo.Message.RequestOppositeLeaderMessage</node>
+    <node x="988.1022727272725" y="0.0">typing.Hashable</node>
+    <node x="0.0" y="260.0">dim_sumo.Vehicle.Vehicle_State</node>
+    <node x="1135.1022727272725" y="170.0">dim_sumo.Simulation.Simulation</node>
+    <node x="2736.0" y="260.0">dim_sumo.Message.RequestFollowerMessage</node>
+    <node x="1838.5" y="80.0">object</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="enum.Enum" target="object">
+      <point x="34.33333333333334" y="-15.0" />
+      <point x="167.83333333333326" y="130.0" />
+      <point x="1844.1428571428569" y="130.0" />
+      <point x="-33.85714285714289" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.DeceivingVehicle.DeceivingVehicle" target="dim_sumo.Vehicle.Vehicle">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="enum.Enum" target="typing.Hashable">
+      <point x="-34.33333333333326" y="-15.0" />
+      <point x="99.16666666666674" y="150.0" />
+      <point x="77.58333333333326" y="150.0" />
+      <point x="77.58333333333326" y="55.0" />
+      <point x="1025.6022727272725" y="55.0" />
+      <point x="-37.5" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.Message" target="object">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.OppositeLeaderMessage" target="dim_sumo.Message.Message">
+      <point x="0.0" y="-15.0" />
+      <point x="1133.5" y="230.0" />
+      <point x="1815.1428571428569" y="230.0" />
+      <point x="-62.85714285714289" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.YieldingMessage" target="dim_sumo.Message.Message">
+      <point x="0.0" y="-15.0" />
+      <point x="2211.0" y="240.0" />
+      <point x="1909.4285714285716" y="240.0" />
+      <point x="31.42857142857156" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Log.Log" target="object">
+      <point x="0.0" y="-15.0" />
+      <point x="2086.5" y="150.0" />
+      <point x="1889.2857142857142" y="150.0" />
+      <point x="11.28571428571422" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Vehicle.Vehicle" target="object">
+      <point x="0.0" y="-15.0" />
+      <point x="466.9999999999999" y="140.0" />
+      <point x="1855.428571428571" y="140.0" />
+      <point x="-22.57142857142867" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.ResponseFollowerMessage" target="dim_sumo.Message.Message">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Simulation.Simulation" target="object">
+      <point x="0.0" y="-15.0" />
+      <point x="1268.6022727272725" y="150.0" />
+      <point x="1866.7142857142858" y="150.0" />
+      <point x="-11.28571428571422" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.SlowDownMessage" target="dim_sumo.Message.Message">
+      <point x="0.0" y="-15.0" />
+      <point x="807.9999999999999" y="220.0" />
+      <point x="1783.7142857142858" y="220.0" />
+      <point x="-94.28571428571422" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.YieldingNotPossibleMessage" target="dim_sumo.Message.Message">
+      <point x="0.0" y="-15.0" />
+      <point x="1502.0" y="240.0" />
+      <point x="1846.5714285714284" y="240.0" />
+      <point x="-31.42857142857133" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.RequestOppositeLeaderMessage" target="dim_sumo.Message.OppositeLeaderMessage">
+      <point x="0.0" y="-15.0" />
+      <point x="929.9999999999999" y="315.0" />
+      <point x="1051.25" y="315.0" />
+      <point x="-82.25" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.ResponseOppositeLeaderMessage" target="dim_sumo.Message.OppositeLeaderMessage">
+      <point x="0.0" y="-15.0" />
+      <point x="1337.0" y="315.0" />
+      <point x="1215.75" y="315.0" />
+      <point x="82.25" y="15.0" />
+    </edge>
+    <edge source="object" target="typing.Hashable">
+      <point x="0.0" y="-15.0" />
+      <point x="1878.0" y="55.0" />
+      <point x="1100.6022727272725" y="55.0" />
+      <point x="37.5" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.SimStateAndConfig.SimStateAndConfig" target="object">
+      <point x="0.0" y="-15.0" />
+      <point x="2373.0" y="140.0" />
+      <point x="1900.5714285714284" y="140.0" />
+      <point x="22.57142857142867" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Lane.Lane" target="object">
+      <point x="0.0" y="-15.0" />
+      <point x="2667.5" y="130.0" />
+      <point x="1911.8571428571427" y="130.0" />
+      <point x="33.85714285714289" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Vehicle.Vehicle_State" target="enum.Enum">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.RequestFollowerMessage" target="dim_sumo.Message.Message">
+      <point x="0.0" y="-15.0" />
+      <point x="2904.5" y="220.0" />
+      <point x="1972.2857142857142" y="220.0" />
+      <point x="94.28571428571422" y="15.0" />
+    </edge>
+    <edge source="enum.Enum" target="enum.EnumMeta">
+      <point x="0.0" y="-15.0" />
+      <point x="133.5" y="150.0" />
+      <point x="155.08333333333326" y="150.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="dim_sumo.Message.PriorityRequiredMessage" target="dim_sumo.Message.Message">
+      <point x="0.0" y="-15.0" />
+      <point x="2544.0" y="230.0" />
+      <point x="1940.8571428571427" y="230.0" />
+      <point x="62.85714285714289" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.33675762439807383" x="1547.5" y="185.0" />
+  <SelectedNodes>
+    <node>object</node>
+  </SelectedNodes>
+  <Categories />
+</Diagram>
+

@@ -1,0 +1,6 @@
+desktop.ini
+__pycache__/
+dim_sumo/__pycache__/
+dim_sumo/__pycache__/Lane.cpython-36.pyc
+dim_sumo/__pycache__/SimState.cpython-36.pyc
+dim_sumo/__pycache__/Vehicle.cpython-36.pyc
