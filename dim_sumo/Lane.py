@@ -20,6 +20,8 @@ class Lane:
         self.adjacent_lanes = list() # Will have and entry for each of the points in the shape with the nearby lanes
         # Indicates the last step in which all vehicles in the lane have had their positions updated
         self.updated_in_step = 0
+        self.convoy_cross = False
+        self.last_vehicle_convoy = None
 
     def find_adjacent_lanes(self, lanes):        
         # For each of the points in the shape look for adjacent lanes

@@ -111,14 +111,20 @@ class Vehicle:
         return True
 
     def __process_yielding(self, response) -> bool:
-        # First verify if we should be yielding or should resume according to the basic rules        
+        # First verify if we should be yielding or should resume according to the basic rules
         if self.__should_yield(response):
             # We are yielding, stop the vehicle if possible
             self.__yield()
             # Check if we should start gaining priority either by time or convoy
-            if self._timeout_expired() or self._convoy_completed():
-                self.log.info(self, " convoy completed")
-                self.state = Vehicle_State.GAINING_PRIORITY
+            convoy_completed, last_vehicle = self._convoy_completed()
+            if convoy_completed:
+                self.lane.last_vehicle_convoy = last_vehicle
+            if response.sender.lane.last_vehicle_convoy is not None:
+                last_vehicle_convoy_passed = response.sender.lane.last_vehicle_convoy.lane.id != traci.vehicle.getLaneID(response.sender.lane.last_vehicle_convoy.id)
+                if (self._timeout_expired() or convoy_completed) and last_vehicle_convoy_passed:
+                    self.log.info(self, " convoy completed")
+                    self.state = Vehicle_State.GAINING_PRIORITY
+
         else:
             # We don't need to keep yielding, transition to the gaining priority state
             self.log.info(self, " timeout expired")
@@ -129,17 +135,18 @@ class Vehicle:
     def _convoy_completed(self):
         # Do not check for convoys unless we have been yielding for a minimum time
         if self._yield_time() < self.config.min_yield_timeout_in_seconds:
-            return False
+            return False, None
         # Message vehicles behind to see if we have a convoy completed
         responses = self.lane.send_message_in_radius(Message.RequestFollowerMessage(self), self.config.max_comunication_distance_upstream)
         # Check how many vehicles were detected
         detected = 0
         for r in responses:
             if isinstance(r, Message.ResponseFollowerMessage):
-                detected += r.detected_vehicles                
-        self.log.debug(self, "convoy size", detected, detected >= self.config.min_convoy_size)
+                detected += r.detected_vehicles
+
+        self.log.debug(self, "convoy size", detected, detected == self.config.min_convoy_size)
         # We check the number of responses +1 to cover this vehicle to approve the convoy size
-        return detected + 1 >= self.config.min_convoy_size
+        return detected + 1 >= self.config.min_convoy_size, responses[-1].sender
 
     def _timeout_expired(self):
         return self._yield_time() >= self.config.yield_timeout_in_seconds
@@ -183,6 +190,14 @@ class Vehicle:
             return False
         if self.__is_yielding() and not response.stopped:
             # We are already stopping and the opposite vehicle is not, we should yield
+            """
+            condicion permite comparar dos carros y darle prioridad al mas cercano a la interseccion
+            
+            if response.distance_to_intersection > self.distance_to_intersection and response.can_brake:
+                # Neither vehicles are stopped, and we are farther from the intersection, yield
+                self.log.debug(self, " Resume AUTO")
+                return False
+            """
             self.log.debug(self, " yielding, already yielding and opposite not stopped")
             return True
         if self.__is_gaining_priority() and (not response.can_brake or not response.stopped):
@@ -266,7 +281,8 @@ class Vehicle:
     def __can_stop(self):
         if self.speed == 0.0 or self.__is_yielding() or self.__is_gaining_priority():
             return True
-        return self.distance_to_intersection - self.config.min_braking_distance_to_intersection >= self.__min_breaking_distance()
+        can_stop = self.distance_to_intersection - self.config.min_braking_distance_to_intersection >= self.__min_breaking_distance()
+        return can_stop
 
     def __min_breaking_distance(self):
         if self.speed == 0.0:
@@ -286,7 +302,7 @@ class Vehicle:
         return self.speed / self.max_decceleration + self.config.stopping_time_delay
 
     def __resume(self):
-        if self.__is_yielding() or self.__is_gaining_priority():
+        if self.__is_yielding():
             try:
                 traci.vehicle.resume(self.id)
                 # traci.vehicle.setSpeed(self.id, -1)
@@ -295,6 +311,15 @@ class Vehicle:
                 self.yielding_since_seconds = -1
             except:
                 pass
+
+        elif self.__is_gaining_priority():
+
+           try:
+                traci.vehicle.setStop(self.id, self.lane.edge_id, pos=self.lane.lane_length - self.config.min_braking_distance_to_intersection, duration=0)
+                self.state = Vehicle_State.AUTO
+                self.yielding_since_seconds = -1
+           except Exception as e:
+               print(e)
         return
 
     def __str__(self):
