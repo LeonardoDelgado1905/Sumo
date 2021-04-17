@@ -24,7 +24,7 @@ from __future__ import print_function
 import os
 import sys
 import optparse
-import random
+from numpy import random
 import numpy as np
 from pathlib import Path
 import datetime
@@ -40,7 +40,7 @@ else:
 from sumolib import checkBinary  # noqa
 import traci  # noqa
 
-def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, dWE = 0.0, dNS = 0.0):
+def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, dWE = 0.1, dNS = 0.0):
     """ Generates a route file with the level of traffic described by the parameters
 
     Args:
@@ -50,7 +50,7 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         dWE (float, optional): Percentage of deceivers expected in the W->E direction. Defaults to 0.0.
         dNS (float, optional): Percentage of deceivers expected in the N->S direction. Defaults to 0.0.
     """
-    random.seed(42)  # make tests reproducible
+    random.seed(28787)  # make tests reproducible
     deceiver_suffix = "_dec"
     car_following_model = "IDM" # Suggested options:  IDM, ACC
     tau = 1 # Expected time between vehicles in seconds
@@ -69,26 +69,45 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         <route id="left" edges="8to7 7to6 outl" />
         """, file=routes)
         vehNr = 0
+        veh_der = 0
+        veh_izq = 0
+        veh_aba = 0
+        veh_arr = 0
         for i in range(seconds):
-            if random.uniform(0, 1) < pWE:
-                deceiver = deceiver_suffix if random.uniform(0, 1) < dWE else ""
+
+            if random.rand()< pWE:
+                deceiver = deceiver_suffix if random.uniform(0, 1) < dNS else ""
                 print(f'    <vehicle id="right_%i{deceiver}" type="Car" route="right" departSpeed="{depart_speed}" depart="%i" />' % (vehNr, i), file=routes)
                 vehNr += 1
-            if random.uniform(0, 1) < pNS:
+                veh_der+=1
+
+            if random.rand() < pNS:
                 deceiver = deceiver_suffix if random.uniform(0, 1) < dNS else ""
                 print(f'    <vehicle id="down_%i{deceiver}" type="Car" route="down" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
-            if random.uniform(0, 1) < pSN:
+                veh_arr += 1
+
+            if random.rand() < pSN:
                 deceiver = deceiver_suffix if random.uniform(0, 1) < dNS else ""
                 print(f'    <vehicle id="up_%i{deceiver}" type="Car" route="up" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
-            if random.uniform(0, 1) < pEW:
+                veh_aba += 1
+
+            if random.rand() < pEW:
                 deceiver = deceiver_suffix if random.uniform(0, 1) < dNS else ""
                 print(f'    <vehicle id="left_%i{deceiver}" type="Car" route="left" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
+                veh_izq += 1
+
+        print(" Vehiculos por la izquierda ", veh_izq)
+
+        print(" Vehiculos por la derecha ", veh_der)
+        print(" Vehiculos por la arriba ", veh_arr)
+        print(" Vehiculos por la abajo ", veh_aba)
+
         print("</routes>", file=routes)
 
 # The program looks like this
@@ -146,9 +165,9 @@ def get_options():
     options, args = optParser.parse_args()
     return options
 
-def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 0.1, dWE = 0.0, dNS = 0.0):
+def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 0.1, dWE = 0.1, pEW=0.1, pSN=0.1, dNS = 0.0):
     # first, generate the route file for this simulation
-    generate_routefile(pWE=pWE, pNS=pNS, dWE=dWE, dNS=dNS)
+    generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS)
 
     # this is the normal way of using traci. sumo is started as a
     # subprocess and then the python script connects and runs
@@ -170,7 +189,9 @@ def run_batch(sumoBinary, vph_combinations, dec_array):
             for ns_dec in dec_array:
                 file = f"{file_prefix}/tripinfo__t_{vph[1]}_{vph[0]}__d_{we_dec}_{ns_dec}.xml"
                 print(file)
-                generate_traffic_and_execute_sumo(sumoBinary, file, pWE=vph[1]/3600, pNS=vph[0]/3600, dWE=we_dec, dNS=ns_dec)
+                generate_traffic_and_execute_sumo(sumoBinary, file, pWE=vph[1]/3600, pNS=vph[0]/3600, pSN=vph[0]/3600,
+                                                  pEW=vph[0] / 3600,
+                                                  dWE=we_dec, dNS=ns_dec)
 
 
 def main(options = None):
@@ -189,7 +210,8 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
     
-    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=900/3600, pWE=900/3600)
+    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=900/3600, pWE=900/3600,
+                                      pSN=900/3600, pEW=900/3600)
 
 # this is the main entry point of this script
 if __name__ == "__main__":
