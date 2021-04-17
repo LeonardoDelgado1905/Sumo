@@ -13,6 +13,6 @@ class SimStateAndConfig:
         self.min_convoy_size = 8
         self.stopping_time_delay = 1
         self.min_braking_distance_to_intersection = 1
-        self.log_info = True
-        self.log_debug = True
+        self.log_info = False
+        self.log_debug = False
         self.log_filter_regex = None #"right_(127|124|125)|down_(119)"

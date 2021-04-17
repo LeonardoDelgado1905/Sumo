@@ -21,6 +21,28 @@ class ResponseFollowerMessage(Message):
         Message.__init__(self, sender)
         self.detected_vehicles = detected_vehicles
 
+
+class RequestEmergencyMessage(Message):
+
+    def __init__(self, sender):
+        Message.__init__(self, sender)
+
+
+class ResponseEmergencyMessage(Message):
+
+    def __init__(self, sender, detected_vehicles=1):
+        Message.__init__(self, sender)
+        self.detected_vehicles = detected_vehicles
+
+
+
+class ResponseNotEmergencyMessage(Message):
+
+    def __init__(self, sender, detected_vehicles=1):
+        Message.__init__(self, sender)
+        self.detected_vehicles = detected_vehicles
+
+
 class PriorityRequiredMessage(Message):
 
     def __init__(self, sender):

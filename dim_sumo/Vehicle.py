@@ -28,6 +28,8 @@ class Vehicle:
         # Set the speed mode of the vehicle to ignore intersection right of way
         traci.vehicle.setSpeedMode(self.id, 23) # See: https://sumo.dlr.de/docs/TraCI/Change_Vehicle_State.html#speed_mode_0xb3
         traci.vehicle.setTau(self.id, 0) # Setting the reaction time of the driver to 0 to simulate an autonomous agent       
+        self.is_emergency = False
+
 
     def refresh_position(self):
         if self.config.current_step > self.current_step:
@@ -73,24 +75,25 @@ class Vehicle:
             if len(responses) > 0:
                 response = responses[0]
                 #self.log.debug(self, "opposite leader response", response)
-                print("La respuesta recibida del lider opuesto es: ", response)
+                #print("La respuesta recibida del lider opuesto es: ", response)
                 self.already_negotiation = True
                 # There is an opposite leader, behave accordingly to the current state of the vehicle negotiating as required
 
                 if self.state == Vehicle_State.AUTO:
-                    print("Vehículo: ", self.id, " esta en estado auto a la negociacion")
+                    #print("Vehículo: ", self.id, " esta en estado auto a la negociacion")
 
                     return self.__process_auto(response)
                 
                 if self.state == Vehicle_State.YIELDING:
-                    print("Vehículo: ", self.id, " esta en estado yielding a la negociacion")
+                   # print("Vehículo: ", self.id, " esta en estado yielding a la negociacion")
                     return self.__process_yielding(response)
 
                 if self.state == Vehicle_State.GAINING_PRIORITY:
-                    print("Vehículo: ", self.id, " esta en estado gaining priority a la negociacion")
+                   # print("Vehículo: ", self.id, " esta en estado gaining priority a la negociacion")
                     return self.__process_gaining_priority(response)
             else:
-                print("no Recibi respuesta")
+                pass
+                #print("no Recibi respuesta")
         # There is no leader in the opposite lane, we can resume
         # Regla 1.A
         # Regla 1.B no existe (No se si hay manera de probar esto en una sola intersección)
@@ -100,30 +103,42 @@ class Vehicle:
 
     def __process_auto(self, response) -> bool:
         # There is an opposite vehicle, start the negotiation. At the moment we only consider cases where there is one opposite leader
-        if self.__should_yield(response):
+        if self.__should_yield(response) or str(type(response.sender)) != '<class \'Vehicle.Vehicle\'>' :
+            # or sender tiene en cola una emergencia
             # We have to yield the lane
             #self.log.info(self, "w", self._yield_time(), " yielding to ", response.sender)
-            print("Vehiculo: ", self.id, " deberia detenerse")
+            #print("Vehiculo: ", self.id, " deberia detenerse")
             self.__yield()
             return True
         # The other vehicle is yielding, continue as normal
-        print("Vehiculo: ", self.id, " no deberia detenerse")
+       # print("Vehiculo: ", self.id, " no deberia detenerse")
         return True
 
     def __process_yielding(self, response) -> bool:
         # First verify if we should be yielding or should resume according to the basic rules
-        if self.__should_yield(response):
+        responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
+                                                     self.config.max_comunication_distance_upstream)
+
+        for r in responses:
+            if isinstance(r, Message.ResponseEmergencyMessage):
+                self.is_emergency = True
+
+        if self.__should_yield(response) and not self.is_emergency:
             # We are yielding, stop the vehicle if possible
             self.__yield()
             # Check if we should start gaining priority either by time or convoy
             convoy_completed, last_vehicle = self._convoy_completed()
             if convoy_completed:
                 self.lane.last_vehicle_convoy = last_vehicle
-            if response.sender.lane.last_vehicle_convoy is not None:
-                last_vehicle_convoy_passed = response.sender.lane.last_vehicle_convoy.lane.id != traci.vehicle.getLaneID(response.sender.lane.last_vehicle_convoy.id)
-                if (self._timeout_expired() or convoy_completed) and last_vehicle_convoy_passed:
-                    self.log.info(self, " convoy completed")
-                    self.state = Vehicle_State.GAINING_PRIORITY
+                if response.sender.lane.last_vehicle_convoy is not None:
+                    try:
+                        last_vehicle_convoy_passed = response.sender.lane.last_vehicle_convoy.lane.id != traci.vehicle.getLaneID(response.sender.lane.last_vehicle_convoy.id)
+                        if (self._timeout_expired() or convoy_completed) and last_vehicle_convoy_passed and not response.sender.is_emergency and str(type(response.sender)) == '<class \'Vehicle.Vehicle\'>':
+                            self.log.info(self, " convoy completed")
+                            self.state = Vehicle_State.GAINING_PRIORITY
+                            #response.sender.lane.last_vehicle_convoy = None
+                    except Exception as ex:
+                        response.sender.lane.last_vehicle_convoy = None
 
         else:
             # We don't need to keep yielding, transition to the gaining priority state
@@ -133,9 +148,7 @@ class Vehicle:
         return True
 
     def _convoy_completed(self):
-        # Do not check for convoys unless we have been yielding for a minimum time
-        if self._yield_time() < self.config.min_yield_timeout_in_seconds:
-            return False, None
+
         # Message vehicles behind to see if we have a convoy completed
         responses = self.lane.send_message_in_radius(Message.RequestFollowerMessage(self), self.config.max_comunication_distance_upstream)
         # Check how many vehicles were detected
@@ -146,7 +159,14 @@ class Vehicle:
 
         self.log.debug(self, "convoy size", detected, detected == self.config.min_convoy_size)
         # We check the number of responses +1 to cover this vehicle to approve the convoy size
-        return detected + 1 >= self.config.min_convoy_size, responses[-1].sender
+
+        if detected + 1 >= self.config.min_convoy_size:
+            return True, responses[-1].sender
+        else:
+            if self._yield_time() < self.config.min_yield_timeout_in_seconds:
+                return False, None
+            else:
+                return True, None
 
     def _timeout_expired(self):
         return self._yield_time() >= self.config.yield_timeout_in_seconds
@@ -243,7 +263,10 @@ class Vehicle:
         if type(message) is Message.RequestOppositeLeaderMessage:
             return self.__process_request_opposite_leader_message(message)
 
-        print(self)
+        if type(message) is Message.RequestEmergencyMessage:
+            return self.__process_request_emergency_message(message)
+
+        #print(self)
 
         return
 
@@ -266,15 +289,24 @@ class Vehicle:
     def __process_request_opposite_leader_message(self, message):
         return Message.ResponseOppositeLeaderMessage(self, self.lane.lane_length - self.lane_position, self.__is_yielding(), self._yield_time(), self.__can_stop())
 
+    def __process_request_emergency_message(self, message):
+        if str(type(self)) != '<class \'Vehicle.Vehicle\'>':
+            print("Soy una Emergencia")
+            return Message.ResponseEmergencyMessage(self)
+        return Message.ResponseNotEmergencyMessage(self)
+
     def __yield(self) -> bool:
         if not self.__is_yielding():
             if not self.__can_stop(): 
                 self.log.debug(self, "CANNOT YIELD, too close to brake")
                 return False
-            self.log.debug(self, "STOP AT", self.lane.edge_id, self.lane.lane_length - self.config.min_braking_distance_to_intersection, "current", self.distance_to_intersection, "stopping distance", self.__min_breaking_distance(), "speed", self.speed, "braking time", self.__min_breaking_time(), "max decceleration", self.max_decceleration)
-            traci.vehicle.setStop(self.id, self.lane.edge_id, pos=self.lane.lane_length - self.config.min_braking_distance_to_intersection)
-            self.state = Vehicle_State.YIELDING
-            self.yielding_since_second = self.config.current_time_seconds
+            try:
+                self.log.debug(self, "STOP AT", self.lane.edge_id, self.lane.lane_length - self.config.min_braking_distance_to_intersection, "current", self.distance_to_intersection, "stopping distance", self.__min_breaking_distance(), "speed", self.speed, "braking time", self.__min_breaking_time(), "max decceleration", self.max_decceleration)
+                traci.vehicle.setStop(self.id, self.lane.edge_id, pos=self.lane.lane_length - self.config.min_braking_distance_to_intersection)
+                self.state = Vehicle_State.YIELDING
+                self.yielding_since_second = self.config.current_time_seconds
+            except Exception as ex:
+                print(ex)
             return True        
         return True
 

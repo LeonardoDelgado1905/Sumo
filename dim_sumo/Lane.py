@@ -1,7 +1,7 @@
 import traci
 import numpy as np
 from Vehicle import Vehicle
-from DeceivingVehicle import DeceivingVehicle
+from EmergencyVehicle import EmergencyVehicle
 from SimStateAndConfig import SimStateAndConfig
 from Log import Log
 
@@ -48,7 +48,7 @@ class Lane:
         for vehicle_id in vehicle_ids:
             if vehicle_id not in self.vehicle_ids:
                 # Determine the type of vehicle to insert in the simulation
-                vehicle_class = DeceivingVehicle if "_dec" in vehicle_id else Vehicle
+                vehicle_class = EmergencyVehicle if "_emergency" in vehicle_id else Vehicle
                 # Create the vehicle and add it to the lane along with its id for performance reasons
                 self.vehicles.append(vehicle_class(vehicle_id, self, self.config))
                 self.vehicle_ids.append(vehicle_id)

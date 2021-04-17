@@ -40,7 +40,7 @@ else:
 from sumolib import checkBinary  # noqa
 import traci  # noqa
 
-def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, dWE = 0.1, dNS = 0.0):
+def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, dWE = 0.1, dNS = 0.0, pEmergency = 0.01):
     """ Generates a route file with the level of traffic described by the parameters
 
     Args:
@@ -52,13 +52,14 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
     """
     random.seed(28787)  # make tests reproducible
     deceiver_suffix = "_dec"
+    emergency_suffix = "_emergency"
     car_following_model = "IDM" # Suggested options:  IDM, ACC
     tau = 1 # Expected time between vehicles in seconds
     sigma = 0 # Driver imperfection in the range [0,1] where 0=perfect
     following_model = f""" carFollowModel="{car_following_model}" sigma="{sigma}" tau="{tau}" """
     car_specs = """ accel="0.8" decel="4.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger" """
     depart_speed = "desired"
-    
+
     with open("data/cross.rou.xml", "w") as routes:
         print(f"""<routes>
         <vType id="Car" length="5.00" minGap="2.50" maxSpeed="16.67" guiShape="passenger" carFollowModel="IDM" accel="0.8" decel="4.5" tau="1.0"/>
@@ -73,41 +74,50 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         veh_izq = 0
         veh_aba = 0
         veh_arr = 0
+        veh_emergency = 0
         for i in range(seconds):
 
             if random.rand()< pWE:
-                deceiver = deceiver_suffix if random.uniform(0, 1) < dNS else ""
-                print(f'    <vehicle id="right_%i{deceiver}" type="Car" route="right" departSpeed="{depart_speed}" depart="%i" />' % (vehNr, i), file=routes)
+                emergency = emergency_suffix if random.uniform(0, 1) < pEmergency else ""
+                color = "yellow" if emergency == "" else "red"
+                print(f'    <vehicle id="right_%i{emergency}" type="Car" color="{color}" route="right" departSpeed="{depart_speed}" depart="%i" />' % (vehNr, i), file=routes)
                 vehNr += 1
                 veh_der+=1
+                veh_emergency += 1 if emergency == emergency_suffix else 0
 
             if random.rand() < pNS:
-                deceiver = deceiver_suffix if random.uniform(0, 1) < dNS else ""
-                print(f'    <vehicle id="down_%i{deceiver}" type="Car" route="down" departSpeed="{depart_speed}" depart="%i" />' % (
+                emergency = emergency_suffix if random.uniform(0, 1) < pEmergency else ""
+                color = "yellow" if emergency == "" else "red"
+                print(f'    <vehicle id="down_%i{emergency}" type="Car" color="{color}" route="down" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
                 veh_arr += 1
+                veh_emergency += 1 if emergency == emergency_suffix else 0
 
             if random.rand() < pSN:
-                deceiver = deceiver_suffix if random.uniform(0, 1) < dNS else ""
-                print(f'    <vehicle id="up_%i{deceiver}" type="Car" route="up" departSpeed="{depart_speed}" depart="%i" />' % (
+                emergency = emergency_suffix if random.uniform(0, 1) < pEmergency else ""
+                color = "yellow" if emergency == "" else "red"
+                print(f'    <vehicle id="up_%i{emergency}" type="Car" color="{color}" route="up" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
                 veh_aba += 1
+                veh_emergency += 1 if emergency == emergency_suffix else 0
 
             if random.rand() < pEW:
-                deceiver = deceiver_suffix if random.uniform(0, 1) < dNS else ""
-                print(f'    <vehicle id="left_%i{deceiver}" type="Car" route="left" departSpeed="{depart_speed}" depart="%i" />' % (
+                emergency = emergency_suffix if random.uniform(0, 1) < pEmergency else ""
+                color = "yellow" if emergency == "" else "red"
+                print(f'    <vehicle id="left_%i{emergency}" type="Car" color="{color}" route="left" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
                 veh_izq += 1
+                veh_emergency += 1 if emergency == emergency_suffix else 0
 
         print(" Vehiculos por la izquierda ", veh_izq)
 
         print(" Vehiculos por la derecha ", veh_der)
         print(" Vehiculos por la arriba ", veh_arr)
         print(" Vehiculos por la abajo ", veh_aba)
-
+        print(" Vehiculos emergencia ", veh_emergency)
         print("</routes>", file=routes)
 
 # The program looks like this
