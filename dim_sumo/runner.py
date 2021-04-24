@@ -30,6 +30,7 @@ from pathlib import Path
 import datetime
 from Simulation import Simulation
 import matplotlib.pyplot as plt
+from statistics import mean
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 if 'SUMO_HOME' in os.environ:
@@ -138,17 +139,22 @@ def run():
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
         state.step(step)
-        if step == 4000:
+        if step == 2000:
            break
         step += 1
 
-    plt.plot(range(len(state.city_density)), state.city_density)
+    step_hot = 1000
+    step_stop = 200
+    plt.plot(range(len(state.city_density[step_hot:-step_stop])), state.city_density[step_hot:-step_stop])
+    print("Average density City: ", mean(state.city_density[step_hot:-step_stop]))
     plt.title("density")
     plt.show()
-    plt.plot(range(len(state.city_flow)), state.city_flow)
+    plt.plot(range(len(state.city_flow[step_hot:-step_stop])), state.city_flow[step_hot:-step_stop])
+    print("Average flow City: ", mean(state.city_flow[step_hot:-step_stop]))
     plt.title("flow")
     plt.show()
-    plt.plot(range(len(state.city_vel)), state.city_vel)
+    plt.plot(range(len(state.city_vel[step_hot:-step_stop])), state.city_vel[step_hot:-step_stop])
+    print("Average velocity City: ", mean(state.city_vel[step_hot:-step_stop]))
     plt.title("vel")
     plt.show()
     traci.close()
@@ -231,8 +237,8 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
     
-    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=900/3600, pWE=900/3600,
-                                      pSN=900/3600, pEW=900/3600)
+    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=1800/3600, pWE=1800/3600,
+                                      pSN=1800/3600, pEW=1800/3600)
 
 # this is the main entry point of this script
 if __name__ == "__main__":
