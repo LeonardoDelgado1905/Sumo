@@ -207,7 +207,7 @@ def run_batch(sumoBinary, vph_combinations, dec_array):
 def main(options = None):
      # this script has been called from the command line. It will start sumo as a
     # server, then connect and run
-    if hasattr(options, "nogui") and (not options.nogui):
+    if hasattr(options, "nogui") and (not options.nogui) and False:
         sumoBinary = checkBinary('sumo')
         
         # Run the experiments in batch 

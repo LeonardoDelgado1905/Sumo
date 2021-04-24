@@ -103,6 +103,15 @@ class Vehicle:
 
     def __process_auto(self, response) -> bool:
         # There is an opposite vehicle, start the negotiation. At the moment we only consider cases where there is one opposite leader
+
+        responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
+                                                     self.config.max_comunication_distance_upstream)
+
+        for r in responses:
+            if isinstance(r, Message.ResponseEmergencyMessage):
+                self.is_emergency = True
+
+
         if self.__should_yield(response) or str(type(response.sender)) != '<class \'Vehicle.Vehicle\'>' :
             # or sender tiene en cola una emergencia
             # We have to yield the lane
