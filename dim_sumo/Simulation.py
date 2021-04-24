@@ -1,12 +1,20 @@
 import Lane
 import traci
 from SimStateAndConfig import SimStateAndConfig
-
+from statistics import mean
 class Simulation:
 
     def __init__(self):
+        self.number_vehicles_in_lanes = dict()
+        self.avg_speed_vehicles_in_lanes = dict()
+        self.density_in_lanes = dict()
         self.lanes = dict()
+        self.flow_in_lanes = dict()
         self.config = SimStateAndConfig()
+        self.city_density = []
+        self.city_flow = []
+        self.city_vel = []
+        self.lanes_names = ["1to2" , "2to3" , "outr", "8to7" , "7to6" , "outl" , "9to2" , "2to6" , "outs" , "12to7", "7to3" , "outn"]
         # Initialize the lanes
         lane_ids = traci.lane.getIDList()
         for lane_id in lane_ids:
@@ -14,6 +22,10 @@ class Simulation:
             lane_length = traci.lane.getLength(lane_id)
             if lane_length > 40:
                 self.lanes[lane_id] = Lane.Lane(lane_id, lane_length, self.config)
+            self.number_vehicles_in_lanes[lane_id] = []
+            self.avg_speed_vehicles_in_lanes[lane_id] = []
+            self.density_in_lanes[lane_id] = []
+            self.flow_in_lanes[lane_id] = []
         # The lanes are ready, let each of them figure out their adjacent lanes
         plain_lanes = self.lanes.values()
         for lane in plain_lanes:
@@ -25,3 +37,22 @@ class Simulation:
         # Send all lanes the update
         for lane_id in self.lanes:
             self.lanes[lane_id].step(current_step)
+            self.number_vehicles_in_lanes[lane_id].append(len(traci.lane.getLastStepVehicleIDs(lane_id)))
+            length_total_veh = 0
+            if self.number_vehicles_in_lanes[lane_id][-1] <= 0:
+                length_total_veh = 0
+            else:
+                length_total_veh = (self.number_vehicles_in_lanes[lane_id][-1] * 10 - 5)
+            self.density_in_lanes[lane_id].append(length_total_veh/500)
+            if len(traci.lane.getLastStepVehicleIDs(lane_id)) == 0:
+                val_speed = 0
+            else:
+                val_speed = mean([traci.vehicle.getSpeed(veh) for veh in traci.lane.getLastStepVehicleIDs(lane_id)])
+            self.avg_speed_vehicles_in_lanes[lane_id].append(val_speed)
+            self.flow_in_lanes[lane_id].append(self.density_in_lanes[lane_id][-1] * self.avg_speed_vehicles_in_lanes[lane_id][-1])
+
+
+        self.city_density.append(mean([v[-1] for k, v in self.density_in_lanes.items() if k[:-2] in self.lanes_names]))
+        self.city_flow.append(mean([v[-1] for k, v in self.flow_in_lanes.items() if k[:-2] in self.lanes_names]))
+        self.city_vel.append(mean([v[-1] for k, v in self.avg_speed_vehicles_in_lanes.items() if k[:-2] in self.lanes_names]))
+

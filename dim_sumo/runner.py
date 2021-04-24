@@ -29,6 +29,7 @@ import numpy as np
 from pathlib import Path
 import datetime
 from Simulation import Simulation
+import matplotlib.pyplot as plt
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 if 'SUMO_HOME' in os.environ:
@@ -137,9 +138,19 @@ def run():
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
         state.step(step)
-        #if step == 200:
-        #   break
+        if step == 4000:
+           break
         step += 1
+
+    plt.plot(range(len(state.city_density)), state.city_density)
+    plt.title("density")
+    plt.show()
+    plt.plot(range(len(state.city_flow)), state.city_flow)
+    plt.title("flow")
+    plt.show()
+    plt.plot(range(len(state.city_vel)), state.city_vel)
+    plt.title("vel")
+    plt.show()
     traci.close()
     sys.stdout.flush()
 
