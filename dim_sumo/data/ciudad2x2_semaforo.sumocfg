@@ -3,8 +3,8 @@
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="ciudad2x2.net.xml"/>
-        <route-files value="ciudad2x2.rou.xml"/>
+        <net-file value="ciudad2x2_semaforo.net.xml"/>
+        <route-files value="ciudad2x2_semaforo.rou.xml"/>
     </input>
 
     <time>
