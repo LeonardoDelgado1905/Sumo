@@ -111,7 +111,6 @@ class Vehicle:
             if isinstance(r, Message.ResponseEmergencyMessage):
                 self.is_emergency = True
 
-
         if self.__should_yield(response) or str(type(response.sender)) != '<class \'Vehicle.Vehicle\'>' :
             # or sender tiene en cola una emergencia
             # We have to yield the lane
@@ -148,6 +147,11 @@ class Vehicle:
                             #response.sender.lane.last_vehicle_convoy = None
                     except Exception as ex:
                         response.sender.lane.last_vehicle_convoy = None
+                else:
+                    if (self._timeout_expired() or convoy_completed) and not response.sender.is_emergency and str(
+                            type(response.sender)) == '<class \'Vehicle.Vehicle\'>':
+                        self.log.info(self, " convoy completed")
+                        self.state = Vehicle_State.GAINING_PRIORITY
 
         else:
             # We don't need to keep yielding, transition to the gaining priority state
@@ -166,7 +170,7 @@ class Vehicle:
             if isinstance(r, Message.ResponseFollowerMessage):
                 detected += r.detected_vehicles
 
-        self.log.debug(self, "convoy size", detected, detected == self.config.min_convoy_size)
+        #print("convoy size", detected, detected == self.config.min_convoy_size)
         # We check the number of responses +1 to cover this vehicle to approve the convoy size
 
         if detected + 1 >= self.config.min_convoy_size:
@@ -220,7 +224,7 @@ class Vehicle:
         if self.__is_yielding() and not response.stopped:
             # We are already stopping and the opposite vehicle is not, we should yield
             """
-            condicion permite comparar dos carros y darle prioridad al mas cercano a la interseccion
+            #condicion permite comparar dos carros y darle prioridad al mas cercano a la interseccion
             
             if response.distance_to_intersection > self.distance_to_intersection and response.can_brake:
                 # Neither vehicles are stopped, and we are farther from the intersection, yield
@@ -300,7 +304,6 @@ class Vehicle:
 
     def __process_request_emergency_message(self, message):
         if str(type(self)) != '<class \'Vehicle.Vehicle\'>':
-            print("Soy una Emergencia")
             return Message.ResponseEmergencyMessage(self)
         return Message.ResponseNotEmergencyMessage(self)
 

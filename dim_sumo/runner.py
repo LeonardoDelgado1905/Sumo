@@ -52,7 +52,7 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         dWE (float, optional): Percentage of deceivers expected in the W->E direction. Defaults to 0.0.
         dNS (float, optional): Percentage of deceivers expected in the N->S direction. Defaults to 0.0.
     """
-    random.seed(28787)  # make tests reproducible
+    random.seed(28487)  # make tests reproducible
     deceiver_suffix = "_dec"
     emergency_suffix = "_emergency"
     car_following_model = "IDM" # Suggested options:  IDM, ACC
@@ -237,8 +237,8 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
     
-    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=1800/3600, pWE=1800/3600,
-                                      pSN=1800/3600, pEW=1800/3600)
+    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=2700/3600, pWE=2700/3600,
+                                      pSN=2700/3600, pEW=2700/3600)
 
 # this is the main entry point of this script
 if __name__ == "__main__":
