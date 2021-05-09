@@ -39,7 +39,7 @@ class Lane:
                 return True
         return False
 
-    def step(self, current_step) -> bool:
+    def step(self, current_step, traffic_lights) -> bool:
         # Keep track of the current step
         self.current_step = current_step
         # Find the id of the vehicles in the lane
@@ -59,8 +59,9 @@ class Lane:
             self.vehicle_ids.pop(0)
 
         # Give the leading vehicle a chance to comunicate with other vehicles
-        if len(self.vehicles) > 0:
-            self.vehicles[0].step_leader(self)
+        if not traffic_lights:
+            if len(self.vehicles) > 0:
+                self.vehicles[0].step_leader(self)
 
     def send_message_in_radius(self, message, radius):
         # Before sending the message make sure all vehicles in the lane are up to date

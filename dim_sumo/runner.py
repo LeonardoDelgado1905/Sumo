@@ -144,15 +144,15 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
 #        <phase duration="6"  state="ryry"/>
 #    </tlLogic>
 
-def run():
+def run(traffic_lights=False):
     """execute the TraCI control loop"""
     state = Simulation()
 
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
-        state.step(step)
-        if step == 18000:
+        state.step(step, traffic_lights)
+        if step == 1500:
            break
         step += 1
 
@@ -205,20 +205,24 @@ def get_options():
     options, args = optParser.parse_args()
     return options
 
-def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 0.1, dWE = 0.1, pEW=0.1, pSN=0.1, dNS = 0.0):
+def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 0.1, dWE = 0.1, pEW=0.1, pSN=0.1,
+                                      dNS = 0.0, pEmergency=0.01,traffic_lights=False):
+
     # first, generate the route file for this simulation
-    generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS)
+    generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS, pEmergency=pEmergency)
+
+    cfg_sumo_file = "data/ciudad2x2_semaforo.sumocfg" if traffic_lights else "data/cross.sumocfg"
 
     # this is the normal way of using traci. sumo is started as a
     # subprocess and then the python script connects and runs
-    traci.start([checkBinary('sumo-gui'), "-c", "data/cross.sumocfg",
+    traci.start([checkBinary('sumo-gui'), "-c", cfg_sumo_file,
                 "--collision.mingap-factor", "0",
                 "--step-length", "0.2",
                 "--tripinfo-output", output_path])
-    run()
+    run(traffic_lights)
 
 
-def run_batch(sumoBinary, vph_combinations, dec_array):
+def run_batch(sumoBinary, vph_combinations, dec_array, traffic_lights):
     # Create the path to store the results and make sure it exists in the file system
     file_prefix = f"data/results/{datetime.date.today().isoformat()}"
     Path(file_prefix).mkdir(parents=True, exist_ok=True)
@@ -230,8 +234,8 @@ def run_batch(sumoBinary, vph_combinations, dec_array):
                 file = f"{file_prefix}/tripinfo__t_{vph[1]}_{vph[0]}__d_{we_dec}_{ns_dec}.xml"
                 print(file)
                 generate_traffic_and_execute_sumo(sumoBinary, file, pWE=vph[1]/3600, pNS=vph[0]/3600, pSN=vph[0]/3600,
-                                                  pEW=vph[0] / 3600,
-                                                  dWE=we_dec, dNS=ns_dec)
+                                                  pEW=vph[0] / 3600, dWE=we_dec, dNS=ns_dec, pEmergency=0.01,
+                                                  traffic_lights=traffic_lights)
 
 
 def main(options = None):
@@ -244,14 +248,14 @@ def main(options = None):
         vph_combinations = np.array([(900,900),(1200,600)])     # Parameter space for traffic level
         dec_array = np.linspace(0.0, 1, 6).round(1)  # Parameter space for deceiving percentage
 
-        run_batch(sumoBinary, vph_combinations, dec_array)
+        run_batch(sumoBinary, vph_combinations, dec_array, traffic_lights=True)
         return
 
     else:
         sumoBinary = checkBinary('sumo-gui')
     
     generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=2700/3600, pWE=2700/3600,
-                                      pSN=2700/3600, pEW=2700/3600)
+                                      pSN=2700/3600, pEW=2700/3600, pEmergency=0.01, traffic_lights=False)
 
 # this is the main entry point of this script
 if __name__ == "__main__":

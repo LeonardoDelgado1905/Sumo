@@ -31,12 +31,12 @@ class Simulation:
         for lane in plain_lanes:
             lane.find_adjacent_lanes(plain_lanes)
 
-    def step(self, current_step):
+    def step(self, current_step, traffic_lights):
         self.config.current_step = current_step
         self.config.current_time_seconds = traci.simulation.getTime()
         # Send all lanes the update
         for lane_id in self.lanes:
-            self.lanes[lane_id].step(current_step)
+            self.lanes[lane_id].step(current_step, traffic_lights)
             self.number_vehicles_in_lanes[lane_id].append(len(traci.lane.getLastStepVehicleIDs(lane_id)))
             length_total_veh = 0
             if self.number_vehicles_in_lanes[lane_id][-1] <= 0:
