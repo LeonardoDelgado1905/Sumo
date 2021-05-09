@@ -42,7 +42,8 @@ else:
 from sumolib import checkBinary  # noqa
 import traci  # noqa
 
-def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, dWE = 0.1, dNS = 0.0, pEmergency = 0.01):
+def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, dWE = 0.1, dNS = 0.0, pEmergency = 0.01,
+                       routefile=None):
     """ Generates a route file with the level of traffic described by the parameters
 
     Args:
@@ -62,7 +63,7 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
     car_specs = """ accel="0.8" decel="4.5" length="5" minGap="2.5" maxSpeed="16.67" guiShape="passenger" """
     depart_speed = "desired"
 
-    with open("data/cross.rou.xml", "w") as routes:
+    with open(routefile, "w") as routes:
         print(f"""<routes>
         <vType id="Car" length="5.00" minGap="2.50" maxSpeed="16.67" guiShape="passenger" carFollowModel="IDM" accel="0.8" decel="4.5" tau="1.0"/>
 
@@ -208,8 +209,9 @@ def get_options():
 def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 0.1, dWE = 0.1, pEW=0.1, pSN=0.1,
                                       dNS = 0.0, pEmergency=0.01,traffic_lights=False):
 
+    routefile= "data/ciudad2x2_semaforo.rou.xml" if traffic_lights else "data/cross.rou.xml"
     # first, generate the route file for this simulation
-    generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS, pEmergency=pEmergency)
+    generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS, pEmergency=pEmergency, routefile=routefile)
 
     cfg_sumo_file = "data/ciudad2x2_semaforo.sumocfg" if traffic_lights else "data/cross.sumocfg"
 
@@ -254,8 +256,8 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
     
-    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=2700/3600, pWE=2700/3600,
-                                      pSN=2700/3600, pEW=2700/3600, pEmergency=0.01, traffic_lights=False)
+    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=3400/3600, pWE=3400/3600,
+                                      pSN=3400/3600, pEW=3400/3600, pEmergency=0.1, traffic_lights=True)
 
 # this is the main entry point of this script
 if __name__ == "__main__":
