@@ -77,42 +77,55 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         veh_aba = 0
         veh_arr = 0
         veh_emergency = 0
+        dict_routes = {
+            "right": veh_der,
+            "left": veh_izq,
+            "up": veh_arr,
+            "down": veh_aba
+        }
+        routes_list = ["right", "left", "up", "down"]
+
         for i in range(seconds):
 
+            if random.uniform(0, 1) < pEmergency:
+                emergency = emergency_suffix
+                color = "red"
+                decision_route = routes_list[random.randint(0, len(routes_list))]
+                print(f'    <vehicle id="{decision_route}_%i{emergency}" type="Car" color="{color}" route="{decision_route}" departSpeed="{depart_speed}" depart="%i" />' % (vehNr, i), file=routes)
+                vehNr += 1
+                veh_emergency += 1
+                dict_routes[decision_route] += 1
+
             if random.rand()< pWE:
-                emergency = emergency_suffix if random.uniform(0, 1) < pEmergency else ""
-                color = "yellow" if emergency == "" else "red"
-                print(f'    <vehicle id="right_%i{emergency}" type="Car" color="{color}" route="right" departSpeed="{depart_speed}" depart="%i" />' % (vehNr, i), file=routes)
+                color = "yellow"
+                print(f'    <vehicle id="right_%i" type="Car" color="{color}" route="right" departSpeed="{depart_speed}" depart="%i" />' % (vehNr, i), file=routes)
                 vehNr += 1
                 veh_der+=1
-                veh_emergency += 1 if emergency == emergency_suffix else 0
+
 
             if random.rand() < pNS:
-                emergency = emergency_suffix if random.uniform(0, 1) < pEmergency else ""
-                color = "yellow" if emergency == "" else "red"
-                print(f'    <vehicle id="down_%i{emergency}" type="Car" color="{color}" route="down" departSpeed="{depart_speed}" depart="%i" />' % (
+                color = "yellow"
+                print(f'    <vehicle id="down_%i" type="Car" color="{color}" route="down" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
                 veh_arr += 1
-                veh_emergency += 1 if emergency == emergency_suffix else 0
+
 
             if random.rand() < pSN:
-                emergency = emergency_suffix if random.uniform(0, 1) < pEmergency else ""
-                color = "yellow" if emergency == "" else "red"
-                print(f'    <vehicle id="up_%i{emergency}" type="Car" color="{color}" route="up" departSpeed="{depart_speed}" depart="%i" />' % (
+                color = "yellow"
+                print(f'    <vehicle id="up_%i" type="Car" color="{color}" route="up" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
                 veh_aba += 1
-                veh_emergency += 1 if emergency == emergency_suffix else 0
+
 
             if random.rand() < pEW:
-                emergency = emergency_suffix if random.uniform(0, 1) < pEmergency else ""
-                color = "yellow" if emergency == "" else "red"
-                print(f'    <vehicle id="left_%i{emergency}" type="Car" color="{color}" route="left" departSpeed="{depart_speed}" depart="%i" />' % (
+                color = "yellow"
+                print(f'    <vehicle id="left_%i" type="Car" color="{color}" route="left" departSpeed="{depart_speed}" depart="%i" />' % (
                     vehNr, i), file=routes)
                 vehNr += 1
                 veh_izq += 1
-                veh_emergency += 1 if emergency == emergency_suffix else 0
+
 
         print(" Vehiculos por la izquierda ", veh_izq)
 
@@ -139,7 +152,7 @@ def run():
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
         state.step(step)
-        if step == 2000:
+        if step == 18000:
            break
         step += 1
 
