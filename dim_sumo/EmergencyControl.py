@@ -11,5 +11,6 @@ for tripinfo in root:
         list_emergency_times.append(float(tripinfo.attrib.get("waitingTime")))
     list_total_times.append(float(tripinfo.attrib.get("waitingTime")))
 
-print("Promedio de tiempo de espera en segundos para los carros de prioridad: ", mean(list_emergency_times))
+if len(list_emergency_times) > 0:
+    print("Promedio de tiempo de espera en segundos para los carros de prioridad: ", mean(list_emergency_times))
 print("Promedio de tiempo de espera en segundos para todos los carros: ", mean(list_total_times))
