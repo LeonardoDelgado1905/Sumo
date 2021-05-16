@@ -153,7 +153,7 @@ def run(traffic_lights=False):
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
         state.step(step, traffic_lights)
-        if step == 1500:
+        if step == 6200:
            break
         step += 1
 
@@ -256,8 +256,8 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
     
-    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=3400/3600, pWE=3400/3600,
-                                      pSN=3400/3600, pEW=3400/3600, pEmergency=0.1, traffic_lights=True)
+    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=720/3600, pWE=720/3600,
+                                      pSN=720/3600, pEW=720/3600, pEmergency=0.01, traffic_lights=False)
 
 # this is the main entry point of this script
 if __name__ == "__main__":

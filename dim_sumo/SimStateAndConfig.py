@@ -9,7 +9,7 @@ class SimStateAndConfig:
         self.max_comunication_distance_between_leaders = 150
         self.max_comunication_distance_upstream = 60
         self.min_yield_timeout_in_seconds = 20
-        self.yield_timeout_in_seconds = 100
+        self.yield_timeout_in_seconds = 150
         self.min_convoy_size = 8
         self.stopping_time_delay = 1
         self.min_braking_distance_to_intersection = 1

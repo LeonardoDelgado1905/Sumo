@@ -1,3 +1,5 @@
+import random
+
 import traci
 import numpy as np
 import Message
@@ -29,6 +31,7 @@ class Vehicle:
         traci.vehicle.setSpeedMode(self.id, 23) # See: https://sumo.dlr.de/docs/TraCI/Change_Vehicle_State.html#speed_mode_0xb3
         traci.vehicle.setTau(self.id, 0) # Setting the reaction time of the driver to 0 to simulate an autonomous agent       
         self.is_emergency = False
+        self.decision = None
 
 
     def refresh_position(self):
@@ -107,6 +110,9 @@ class Vehicle:
         responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
                                                      self.config.max_comunication_distance_upstream)
 
+        if str(type(self)) != '<class \'Vehicle.Vehicle\'>':
+            self.is_emergency = True
+
         for r in responses:
             if isinstance(r, Message.ResponseEmergencyMessage):
                 self.is_emergency = True
@@ -127,11 +133,16 @@ class Vehicle:
         responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
                                                      self.config.max_comunication_distance_upstream)
 
+        if str(type(self)) != '<class \'Vehicle.Vehicle\'>':
+            self.is_emergency = True
+
         for r in responses:
             if isinstance(r, Message.ResponseEmergencyMessage):
                 self.is_emergency = True
 
-        if self.__should_yield(response) and not self.is_emergency:
+        should_yield = self.__should_yield(response)
+
+        if should_yield and not self.is_emergency:
             # We are yielding, stop the vehicle if possible
             self.__yield()
             # Check if we should start gaining priority either by time or convoy
@@ -155,8 +166,18 @@ class Vehicle:
 
         else:
             # We don't need to keep yielding, transition to the gaining priority state
-            self.log.info(self, " timeout expired")
-            self.state = Vehicle_State.GAINING_PRIORITY
+            #self.log.info(self, " timeout expired", )
+            if self.is_emergency and response.sender.is_emergency and self.decision is None:
+                self.decision = bool(random.randint(0, 1))
+                response.sender.decision = not self.decision
+            elif self.is_emergency and not response.sender.is_emergency:
+                self.decision = None
+
+            if self.decision == True or self.decision is None:
+                print("Veh, " + self.id, " Gaining priority, Soy prioridad? ", self.is_emergency, " Deberia detenerme ", should_yield, " decision: ", self.decision)
+                self.state = Vehicle_State.GAINING_PRIORITY
+            else:
+                self.state = Vehicle_State.YIELDING
             
         return True
 
