@@ -211,6 +211,21 @@ class Vehicle:
         return self.config.current_time_seconds - self.yielding_since_second
 
     def __process_gaining_priority(self, response) -> bool:
+
+        if self.is_emergency and response.sender.is_emergency and self.decision is None:
+            self.decision = bool(random.randint(0, 1))
+            response.sender.decision = not self.decision
+        elif self.is_emergency and not response.sender.is_emergency:
+            self.decision = None
+
+        if self.decision == True or self.decision is None:
+            print("Veh, " + self.id, " Gaining priority, Soy prioridad? ", self.is_emergency, " decision: ", self.decision)
+            self.state = Vehicle_State.GAINING_PRIORITY
+        else:
+            self.state = Vehicle_State.YIELDING
+            #self.__resume()
+            return True
+
         if self.__should_yield(response):
             # Do not resume yet but start exchanging messages to gain priority
             responses = self.lane.send_message_opposite_leader_in_radius(Message.PriorityRequiredMessage(self), self.config.max_comunication_distance_between_leaders)            
