@@ -1,7 +1,9 @@
 import Lane
 import traci
 from SimStateAndConfig import SimStateAndConfig
-from statistics import mean
+from utils import mean_confidence_interval
+
+
 class Simulation:
 
     def __init__(self):
@@ -47,12 +49,13 @@ class Simulation:
             if len(traci.lane.getLastStepVehicleIDs(lane_id)) == 0:
                 val_speed = 0
             else:
-                val_speed = mean([traci.vehicle.getSpeed(veh) for veh in traci.lane.getLastStepVehicleIDs(lane_id)])
+                val_speed = mean_confidence_interval([traci.vehicle.getSpeed(veh) for veh in traci.lane.getLastStepVehicleIDs(lane_id)])[0]
+
             self.avg_speed_vehicles_in_lanes[lane_id].append(val_speed)
             self.flow_in_lanes[lane_id].append(self.density_in_lanes[lane_id][-1] * self.avg_speed_vehicles_in_lanes[lane_id][-1])
 
 
-        self.city_density.append(mean([v[-1] for k, v in self.density_in_lanes.items() if k[:-2] in self.lanes_names]))
-        self.city_flow.append(mean([v[-1] for k, v in self.flow_in_lanes.items() if k[:-2] in self.lanes_names]))
-        self.city_vel.append(mean([v[-1] for k, v in self.avg_speed_vehicles_in_lanes.items() if k[:-2] in self.lanes_names]))
+        self.city_density.append(float(mean_confidence_interval([v[-1] for k, v in self.density_in_lanes.items() if k[:-2] in self.lanes_names])[0]))
+        self.city_flow.append(float(mean_confidence_interval([v[-1] for k, v in self.flow_in_lanes.items() if k[:-2] in self.lanes_names])[0]))
+        self.city_vel.append(float(mean_confidence_interval([v[-1] for k, v in self.avg_speed_vehicles_in_lanes.items() if k[:-2] in self.lanes_names])[0]))
 

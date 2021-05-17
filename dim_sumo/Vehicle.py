@@ -174,7 +174,7 @@ class Vehicle:
                 self.decision = None
 
             if self.decision == True or self.decision is None:
-                print("Veh, " + self.id, " Gaining priority, Soy prioridad? ", self.is_emergency, " Deberia detenerme ", should_yield, " decision: ", self.decision)
+      #          print("Veh, " + self.id, " Gaining priority, Soy prioridad? ", self.is_emergency, " Deberia detenerme ", should_yield, " decision: ", self.decision)
                 self.state = Vehicle_State.GAINING_PRIORITY
             else:
                 self.state = Vehicle_State.YIELDING
@@ -219,7 +219,7 @@ class Vehicle:
             self.decision = None
 
         if self.decision == True or self.decision is None:
-            print("Veh, " + self.id, " Gaining priority, Soy prioridad? ", self.is_emergency, " decision: ", self.decision)
+           # print("Veh, " + self.id, " Gaining priority, Soy prioridad? ", self.is_emergency, " decision: ", self.decision)
             self.state = Vehicle_State.GAINING_PRIORITY
         else:
             self.state = Vehicle_State.YIELDING

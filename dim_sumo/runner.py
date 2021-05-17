@@ -30,7 +30,7 @@ from pathlib import Path
 import datetime
 from Simulation import Simulation
 import matplotlib.pyplot as plt
-from statistics import mean
+from utils import mean_confidence_interval
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 if 'SUMO_HOME' in os.environ:
@@ -153,22 +153,22 @@ def run(traffic_lights=False):
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
         state.step(step, traffic_lights)
-        if step == 6200:
+        if step == 1400:
            break
         step += 1
 
     step_hot = 1000
     step_stop = 200
     plt.plot(range(len(state.city_density[step_hot:-step_stop])), state.city_density[step_hot:-step_stop])
-    print("Average density City: ", mean(state.city_density[step_hot:-step_stop]))
+    print("Average density City: ", mean_confidence_interval(state.city_density[step_hot:-step_stop]))
     plt.title("density")
     plt.show()
     plt.plot(range(len(state.city_flow[step_hot:-step_stop])), state.city_flow[step_hot:-step_stop])
-    print("Average flow City: ", mean(state.city_flow[step_hot:-step_stop]))
+    print("Average flow City: ", mean_confidence_interval(state.city_flow[step_hot:-step_stop]))
     plt.title("flow")
     plt.show()
     plt.plot(range(len(state.city_vel[step_hot:-step_stop])), state.city_vel[step_hot:-step_stop])
-    print("Average velocity City: ", mean(state.city_vel[step_hot:-step_stop]))
+    print("Average velocity City: ", mean_confidence_interval(state.city_vel[step_hot:-step_stop]))
     plt.title("vel")
     plt.show()
     traci.close()
@@ -257,7 +257,7 @@ def main(options = None):
         sumoBinary = checkBinary('sumo-gui')
     
     generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=720/3600, pWE=720/3600,
-                                      pSN=720/3600, pEW=720/3600, pEmergency=0.1, traffic_lights=False)
+                                      pSN=720/3600, pEW=720/3600, pEmergency=0.0, traffic_lights=False)
 
 # this is the main entry point of this script
 if __name__ == "__main__":
