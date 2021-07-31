@@ -160,7 +160,7 @@ class Vehicle:
                         response.sender.lane.last_vehicle_convoy = None
                 else:
                     if (self._timeout_expired() or convoy_completed) and not response.sender.is_emergency and str(
-                            type(response.sender)) == '<class \'Vehicle.Vehicle\'>':
+                            type(response.sender)) == '<class \'Vehicle.Vehicle\'>' and self.decision != False:
                         self.log.info(self, " convoy completed")
                         self.state = Vehicle_State.GAINING_PRIORITY
 
@@ -217,6 +217,11 @@ class Vehicle:
             response.sender.decision = not self.decision
         elif self.is_emergency and not response.sender.is_emergency:
             self.decision = None
+        elif not self.is_emergency and response.sender.is_emergency:
+            self.decision = False
+        elif self.decision is None and self.state == Vehicle_State.GAINING_PRIORITY and response.sender.state == Vehicle_State.GAINING_PRIORITY:
+            self.decision = bool(random.randint(0, 1))
+            response.sender.decision = not self.decision
 
         if self.decision == True or self.decision is None:
            # print("Veh, " + self.id, " Gaining priority, Soy prioridad? ", self.is_emergency, " decision: ", self.decision)
