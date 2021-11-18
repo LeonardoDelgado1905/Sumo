@@ -2,6 +2,7 @@ import traci
 import numpy as np
 from Vehicle import Vehicle
 from EmergencyVehicle import EmergencyVehicle
+from FlawVehicle import FlawVehicle
 from SimStateAndConfig import SimStateAndConfig
 from Log import Log
 
@@ -49,6 +50,7 @@ class Lane:
             if vehicle_id not in self.vehicle_ids:
                 # Determine the type of vehicle to insert in the simulation
                 vehicle_class = EmergencyVehicle if "_emergency" in vehicle_id else Vehicle
+                vehicle_class = FlawVehicle if "_flaw" in vehicle_id else vehicle_class
                 # Create the vehicle and add it to the lane along with its id for performance reasons
                 self.vehicles.append(vehicle_class(vehicle_id, self, self.config))
                 self.vehicle_ids.append(vehicle_id)
@@ -101,12 +103,44 @@ class Lane:
 
         return responses
 
+    def send_perception_opposite_leader_in_radius(self, message, radius):
+        # Find the endpoing closest to the sender
+        min_index = 0
+        min_distance = message.sender.distance_to_point(self.shape[0])
+        for i in range(1, len(self.shape)):
+            distance = message.sender.distance_to_point(self.shape[i])
+            if distance < min_distance:
+                min_index = i
+                min_distance = distance
+
+        # Send the message to the leaders in lanes that are opposite to the endpoint found
+        responses = list()
+        for opposite_lane in self.adjacent_lanes[min_index]:
+            response = opposite_lane.send_perception_to_leader_in_radius(message, radius)
+            if response is not None:
+                responses.append(response)
+
+        # self.log.info(message.sender.id, " , mensajes: ", responses)
+
+        return responses
+
     def send_message_to_leader_in_radius(self, message, radius):
         # Get the leader in this lane
         leader = self.vehicles[0] if len(self.vehicles) > 0 else None
         # Check if it exists and is within the radius of the sender
         if (not leader is None 
            and leader.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection 
+           and leader.distance_to_vehicle(message.sender) <= radius):
+            # Send the message as requested
+            return leader.process_message(message)
+        return None
+
+    def send_perception_to_leader_in_radius(self, message, radius):
+        # Get the leader in this lane
+        leader = self.vehicles[0] if len(self.vehicles) > 0 else None
+        # Check if it exists and is within the radius of the sender
+        if (not leader is None
+           and leader.distance_to_intersection < self.config.start_perception_at_distance_from_intersection
            and leader.distance_to_vehicle(message.sender) <= radius):
             # Send the message as requested
             return leader.process_message(message)

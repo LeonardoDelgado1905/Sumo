@@ -43,7 +43,7 @@ from sumolib import checkBinary  # noqa
 import traci  # noqa
 
 def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, dWE = 0.1, dNS = 0.0, pEmergency = 0.01,
-                       routefile=None):
+                       pFlaw=0.01, routefile=None):
     """ Generates a route file with the level of traffic described by the parameters
 
     Args:
@@ -56,6 +56,7 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
     random.seed(15)  # make tests reproducible
     deceiver_suffix = "_dec"
     emergency_suffix = "_emergency"
+    flaw_suffix = "_flaw"
     car_following_model = "IDM" # Suggested options:  IDM, ACC
     tau = 1 # Expected time between vehicles in seconds
     sigma = 0 # Driver imperfection in the range [0,1] where 0=perfect
@@ -78,6 +79,7 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         veh_aba = 0
         veh_arr = 0
         veh_emergency = 0
+        veh_flaw = 0
         dict_routes = {
             "right": veh_der,
             "left": veh_izq,
@@ -95,6 +97,15 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
                 print(f'    <vehicle id="{decision_route}_%i{emergency}" type="Car" color="{color}" route="{decision_route}" departSpeed="{depart_speed}" depart="%i" />' % (vehNr, i), file=routes)
                 vehNr += 1
                 veh_emergency += 1
+                dict_routes[decision_route] += 1
+
+            elif random.uniform(0, 1) < pFlaw:
+                flaw = flaw_suffix
+                color = "blue"
+                decision_route = routes_list[random.randint(0, len(routes_list))]
+                print(f'    <vehicle id="{decision_route}_%i{flaw}" type="Car" color="{color}" route="{decision_route}" departSpeed="{depart_speed}" depart="%i" />' % (vehNr, i), file=routes)
+                vehNr += 1
+                veh_flaw += 1
                 dict_routes[decision_route] += 1
 
             if random.rand()< pWE:
@@ -134,6 +145,7 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         print(" Vehiculos por la arriba ", veh_arr)
         print(" Vehiculos por la abajo ", veh_aba)
         print(" Vehiculos emergencia ", veh_emergency)
+        print(" Vehiculos con falla ", veh_flaw)
         print("</routes>", file=routes)
 
 # The program looks like this
@@ -207,11 +219,11 @@ def get_options():
     return options
 
 def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 0.1, dWE = 0.1, pEW=0.1, pSN=0.1,
-                                      dNS = 0.0, pEmergency=0.01,traffic_lights=False):
+                                      dNS = 0.0, pEmergency=0.01, pFlaw=0.01, traffic_lights=False):
 
     routefile= "data/ciudad2x2_semaforo.rou.xml" if traffic_lights else "data/cross.rou.xml"
     # first, generate the route file for this simulation
-    generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS, pEmergency=pEmergency, routefile=routefile)
+    generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS, pEmergency=pEmergency, pFlaw=pFlaw, routefile=routefile)
 
     cfg_sumo_file = "data/ciudad2x2_semaforo.sumocfg" if traffic_lights else "data/cross.sumocfg"
 

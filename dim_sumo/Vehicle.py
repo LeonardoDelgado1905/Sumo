@@ -69,8 +69,13 @@ class Vehicle:
         self.lane = lane
         self.refresh_position()
 
+        #Cannot negociate, it's a flaw vehicle
+        isFlaw = "_flaw" in self.id
         # Check if there is a leader in the opposite lane that we can negotiate with                
         if self.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection:
+
+            #if not isFlaw or self.distance_to_intersection < self.config.start_perception_at_distance_from_intersection:
+
             # Find if there is a leader we can speak to in the opposite lane
             leader_request_message = Message.RequestOppositeLeaderMessage(self, self.lane_position, self._yield_time())
             responses = self.lane.send_message_opposite_leader_in_radius(leader_request_message, self.config.max_comunication_distance_between_leaders)
@@ -86,7 +91,7 @@ class Vehicle:
                     #print("Vehículo: ", self.id, " esta en estado auto a la negociacion")
 
                     return self.__process_auto(response)
-                
+
                 if self.state == Vehicle_State.YIELDING:
                    # print("Vehículo: ", self.id, " esta en estado yielding a la negociacion")
                     return self.__process_yielding(response)
@@ -95,8 +100,20 @@ class Vehicle:
                    # print("Vehículo: ", self.id, " esta en estado gaining priority a la negociacion")
                     return self.__process_gaining_priority(response)
             else:
+                # Find if there is a leader i can 'see' (perception) to in the opposite lane
+                leader_request_message = Message.RequestOppositeLeaderMessage(self, self.lane_position,
+                                                                              self._yield_time())
+                responses = self.lane.send_perception_opposite_leader_in_radius(leader_request_message,
+                                                                             self.config.max_perception_distance_between_leaders)
+                if responses is not None and len(responses) > 0: #No recibí respuesta de la lane opuesta pero estoy "viendo" un carro
+                    print("Hay una falla al otro lado")
+
+
                 pass
                 #print("no Recibi respuesta")
+           # else:
+            #    return self.__process_yielding(None)
+
         # There is no leader in the opposite lane, we can resume
         # Regla 1.A
         # Regla 1.B no existe (No se si hay manera de probar esto en una sola intersección)
@@ -110,14 +127,14 @@ class Vehicle:
         responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
                                                      self.config.max_comunication_distance_upstream)
 
-        if str(type(self)) != '<class \'Vehicle.Vehicle\'>':
+        if str(type(self)) == '<class \'EmergencyVehicle.EmergencyVehicle\'>':
             self.is_emergency = True
 
         for r in responses:
             if isinstance(r, Message.ResponseEmergencyMessage):
                 self.is_emergency = True
 
-        if self.__should_yield(response) or str(type(response.sender)) != '<class \'Vehicle.Vehicle\'>' :
+        if self.__should_yield(response) or str(type(response.sender)) == '<class \'EmergencyVehicle.EmergencyVehicle\'>' :
             # or sender tiene en cola una emergencia
             # We have to yield the lane
             #self.log.info(self, "w", self._yield_time(), " yielding to ", response.sender)
@@ -133,14 +150,18 @@ class Vehicle:
         responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
                                                      self.config.max_comunication_distance_upstream)
 
-        if str(type(self)) != '<class \'Vehicle.Vehicle\'>':
+        if str(type(self)) == '<class \'EmergencyVehicle.EmergencyVehicle\'>':
+            print("mi clase es: " + str(type(self)))
             self.is_emergency = True
 
         for r in responses:
             if isinstance(r, Message.ResponseEmergencyMessage):
                 self.is_emergency = True
 
-        should_yield = self.__should_yield(response)
+        if response is None:
+            should_yield = True
+        else:
+            should_yield = self.__should_yield(response)
 
         if should_yield and not self.is_emergency:
             # We are yielding, stop the vehicle if possible
@@ -344,7 +365,9 @@ class Vehicle:
         return Message.ResponseOppositeLeaderMessage(self, self.lane.lane_length - self.lane_position, self.__is_yielding(), self._yield_time(), self.__can_stop())
 
     def __process_request_emergency_message(self, message):
-        if str(type(self)) != '<class \'Vehicle.Vehicle\'>':
+        if str(type(self)) == '<class \'EmergencyVehicle.EmergencyVehicle\'>':
+
+            #print("YO, una emergencia soy:"+str(type(self))) #TODO:
             return Message.ResponseEmergencyMessage(self)
         return Message.ResponseNotEmergencyMessage(self)
 
