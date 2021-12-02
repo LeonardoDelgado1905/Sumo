@@ -31,6 +31,7 @@ class Vehicle:
         traci.vehicle.setSpeedMode(self.id, 23) # See: https://sumo.dlr.de/docs/TraCI/Change_Vehicle_State.html#speed_mode_0xb3
         traci.vehicle.setTau(self.id, 0) # Setting the reaction time of the driver to 0 to simulate an autonomous agent       
         self.is_emergency = False
+        self.is_flaw = True
         self.decision = None
 
 
@@ -71,14 +72,20 @@ class Vehicle:
 
         #Cannot negociate, it's a flaw vehicle
         isFlaw = "_flaw" in self.id
-        # Check if there is a leader in the opposite lane that we can negotiate with                
+        # Check if there is a leader in the opposite lane that we can negotiate with
+
         if self.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection:
 
             #if not isFlaw or self.distance_to_intersection < self.config.start_perception_at_distance_from_intersection:
 
-            # Find if there is a leader we can speak to in the opposite lane
-            leader_request_message = Message.RequestOppositeLeaderMessage(self, self.lane_position, self._yield_time())
-            responses = self.lane.send_message_opposite_leader_in_radius(leader_request_message, self.config.max_comunication_distance_between_leaders)
+            responses = []
+            if isFlaw:
+                # If is a flaw vehilce and it's in a distance from the intersection his state should be Yielding
+                self.state = Vehicle_State.YIELDING
+            else:
+                # Find if there is a leader we can speak to in the opposite lane
+                leader_request_message = Message.RequestOppositeLeaderMessage(self, self.lane_position, self._yield_time())
+                responses = self.lane.send_message_opposite_leader_in_radius(leader_request_message, self.config.max_comunication_distance_between_leaders)
 
             if len(responses) > 0:
                 response = responses[0]
@@ -105,14 +112,18 @@ class Vehicle:
                                                                               self._yield_time())
                 responses = self.lane.send_perception_opposite_leader_in_radius(leader_request_message,
                                                                              self.config.max_perception_distance_between_leaders)
-                if responses is not None and len(responses) > 0: #No recibí respuesta de la lane opuesta pero estoy "viendo" un carro
-                    print("Hay una falla al otro lado")
-
-
-                pass
+                if len(responses) > 0: # I don't get a response (i'm a flaw or the opposite leader is a flaw) but I'm 'seeing' another vehicle
+                    if isFlaw:
+                        #If there is a leader and i'm a flaw i'll handle my yielding
+                        return self.__process_yielding
+                    else:
+                        #If there is a flaw leader then i'll gain priority and thell the convoy there's a flaw
+                        print("Hay una falla al otro lado")
+                        return self.__is_gaining_priority
                 #print("no Recibi respuesta")
            # else:
             #    return self.__process_yielding(None)
+
 
         # There is no leader in the opposite lane, we can resume
         # Regla 1.A
@@ -146,23 +157,24 @@ class Vehicle:
         return True
 
     def __process_yielding(self, response) -> bool:
-        # First verify if we should be yielding or should resume according to the basic rules
-        responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
-                                                     self.config.max_comunication_distance_upstream)
+
+        if str(type(self)) == '<class \'FlawVehicle.FlawVehicle\'>':
+            self.is_flaw = True            
+        else: # Just send a message if is not a flaw
+            # First verify if we should be yielding or should resume according to the basic rules
+            responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
+                                                         self.config.max_comunication_distance_upstream)
+            for r in responses:
+                if isinstance(r, Message.ResponseEmergencyMessage):
+                    self.is_emergency = True
+
 
         if str(type(self)) == '<class \'EmergencyVehicle.EmergencyVehicle\'>':
-            print("mi clase es: " + str(type(self)))
+            #print("mi clase es: " + str(type(self)))
             self.is_emergency = True
-
-        for r in responses:
-            if isinstance(r, Message.ResponseEmergencyMessage):
-                self.is_emergency = True
-
-        if response is None:
-            should_yield = True
-        else:
-            should_yield = self.__should_yield(response)
-
+        
+        should_yield = self.__should_yield(response)
+        
         if should_yield and not self.is_emergency:
             # We are yielding, stop the vehicle if possible
             self.__yield()
@@ -254,7 +266,11 @@ class Vehicle:
 
         if self.__should_yield(response):
             # Do not resume yet but start exchanging messages to gain priority
-            responses = self.lane.send_message_opposite_leader_in_radius(Message.PriorityRequiredMessage(self), self.config.max_comunication_distance_between_leaders)            
+
+            if self.is_flaw:
+                responses = self.lane.send_perception_opposite_leader_in_radius(Message.PriorityRequiredMessage(self), self.config.max_perception_distance_between_leaders)            
+            else:
+                responses = self.lane.send_message_opposite_leader_in_radius(Message.PriorityRequiredMessage(self), self.config.max_comunication_distance_between_leaders)            
             # If any of the responses indicate a non yielding vehicle continue in this state and try again in next step
             self.log.debug(self, "priority requested. Responses:")
             for r in responses:
@@ -277,6 +293,9 @@ class Vehicle:
         Returns:
             bool: boolean indicating if this vehicle should yield
         """
+        if self.is_flaw == True and response == None:
+            # It's too far from instersection to percept another car, it should yield
+            return True
         if not self.__can_stop():
             # We can not stop in time, do not try to yield
             self.log.debug(self, " not yielding, too close to brake")
