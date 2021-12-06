@@ -113,13 +113,14 @@ class Vehicle:
                 responses = self.lane.send_perception_opposite_leader_in_radius(leader_request_message,
                                                                              self.config.max_perception_distance_between_leaders)
                 if len(responses) > 0: # I don't get a response (i'm a flaw or the opposite leader is a flaw) but I'm 'seeing' another vehicle
+                    response = responses[0]
                     if isFlaw:
                         #If there is a leader and i'm a flaw i'll handle my yielding
-                        return self.__process_yielding
+                        return self.__process_yielding(response)
                     else:
                         #If there is a flaw leader then i'll gain priority and thell the convoy there's a flaw
                         print("Hay una falla al otro lado")
-                        return self.__is_gaining_priority
+                        return self.__process_gaining_priority(response)
                 #print("no Recibi respuesta")
            # else:
             #    return self.__process_yielding(None)
@@ -294,6 +295,7 @@ class Vehicle:
             bool: boolean indicating if this vehicle should yield
         """
         if self.is_flaw == True and response == None:
+            print("FALLA VA A PARAR")
             # It's too far from instersection to percept another car, it should yield
             return True
         if not self.__can_stop():
