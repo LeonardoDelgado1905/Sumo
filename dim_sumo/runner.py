@@ -248,7 +248,7 @@ def run_batch(sumoBinary, vph_combinations, dec_array, traffic_lights):
                 file = f"{file_prefix}/tripinfo__t_{vph[1]}_{vph[0]}__d_{we_dec}_{ns_dec}.xml"
                 print(file)
                 generate_traffic_and_execute_sumo(sumoBinary, file, pWE=vph[1]/3600, pNS=vph[0]/3600, pSN=vph[0]/3600,
-                                                  pEW=vph[0] / 3600, dWE=we_dec, dNS=ns_dec, pEmergency=0.01,
+                                                  pEW=vph[0] / 3600, dWE=we_dec, dNS=ns_dec, pEmergency=0.00,
                                                   traffic_lights=traffic_lights)
 
 
@@ -268,8 +268,8 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
     
-    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=720/3600, pWE=720/3600,
-                                      pSN=720/3600, pEW=720/3600, pEmergency=0.01, traffic_lights=False)
+    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=360/3600, pWE=360/3600,
+                                      pSN=360/3600, pEW=360/3600, pEmergency=0.00, pFlaw=0.1, traffic_lights=False)
 
 # this is the main entry point of this script
 if __name__ == "__main__":

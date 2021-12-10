@@ -31,7 +31,7 @@ class Vehicle:
         traci.vehicle.setSpeedMode(self.id, 23) # See: https://sumo.dlr.de/docs/TraCI/Change_Vehicle_State.html#speed_mode_0xb3
         traci.vehicle.setTau(self.id, 0) # Setting the reaction time of the driver to 0 to simulate an autonomous agent       
         self.is_emergency = False
-        self.is_flaw = True
+        self.is_flaw = False
         self.decision = None
 
 
@@ -70,6 +70,9 @@ class Vehicle:
         self.lane = lane
         self.refresh_position()
 
+        if (self.id == "right_198_flaw"):
+            print("SOY 198")
+
         #Cannot negociate, it's a flaw vehicle
         isFlaw = "_flaw" in self.id
         # Check if there is a leader in the opposite lane that we can negotiate with
@@ -107,14 +110,17 @@ class Vehicle:
                    # print("Vehículo: ", self.id, " esta en estado gaining priority a la negociacion")
                     return self.__process_gaining_priority(response)
             else:
+
                 # Find if there is a leader i can 'see' (perception) to in the opposite lane
                 leader_request_message = Message.RequestOppositeLeaderMessage(self, self.lane_position,
                                                                               self._yield_time())
                 responses = self.lane.send_perception_opposite_leader_in_radius(leader_request_message,
                                                                              self.config.max_perception_distance_between_leaders)
                 if len(responses) > 0: # I don't get a response (i'm a flaw or the opposite leader is a flaw) but I'm 'seeing' another vehicle
+                    print("HUBO RESPUESTA EN PARCEPCION")
                     response = responses[0]
                     if isFlaw:
+                        print("VOY a PROCESAR UNA FALLA PARANDO")
                         #If there is a leader and i'm a flaw i'll handle my yielding
                         return self.__process_yielding(response)
                     else:
@@ -160,7 +166,7 @@ class Vehicle:
     def __process_yielding(self, response) -> bool:
 
         if str(type(self)) == '<class \'FlawVehicle.FlawVehicle\'>':
-            self.is_flaw = True            
+            self.is_flaw = True
         else: # Just send a message if is not a flaw
             # First verify if we should be yielding or should resume according to the basic rules
             responses = self.lane.send_message_in_radius(Message.RequestEmergencyMessage(self),
@@ -294,9 +300,8 @@ class Vehicle:
         Returns:
             bool: boolean indicating if this vehicle should yield
         """
-        if self.is_flaw == True and response == None:
-            print("FALLA VA A PARAR")
-            # It's too far from instersection to percept another car, it should yield
+        if self.is_flaw == True:
+            print(self.id, "FALLA VA A PARAR")
             return True
         if not self.__can_stop():
             # We can not stop in time, do not try to yield
@@ -431,13 +436,15 @@ class Vehicle:
         return self.speed / self.max_decceleration + self.config.stopping_time_delay
 
     def __resume(self):
+        if (self.id == "down_22_flaw"):
+            print("SOY 22")
         if self.__is_yielding():
             try:
-                traci.vehicle.resume(self.id)
-                # traci.vehicle.setSpeed(self.id, -1)
                 self.log.debug(self, "RESUME - distance to instersection", self.distance_to_intersection)
                 self.state = Vehicle_State.AUTO
                 self.yielding_since_seconds = -1
+                traci.vehicle.resume(self.id)
+                # traci.vehicle.setSpeed(self.id, -1)
             except:
                 pass
 
