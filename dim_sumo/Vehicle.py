@@ -70,14 +70,16 @@ class Vehicle:
         self.lane = lane
         self.refresh_position()
 
-        if (self.id == "right_198_flaw"):
-            print("SOY 198")
+        if (self.id == "right_22_flaw"):
+            print("SOY 22")
 
         #Cannot negociate, it's a flaw vehicle
         isFlaw = "_flaw" in self.id
         # Check if there is a leader in the opposite lane that we can negotiate with
 
         if self.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection:
+            if (self.id == "right_11"):
+                print("SOY 11")
 
             #if not isFlaw or self.distance_to_intersection < self.config.start_perception_at_distance_from_intersection:
 
@@ -109,13 +111,15 @@ class Vehicle:
                 if self.state == Vehicle_State.GAINING_PRIORITY:
                    # print("Vehículo: ", self.id, " esta en estado gaining priority a la negociacion")
                     return self.__process_gaining_priority(response)
+            """
+            
             else:
 
                 # Find if there is a leader i can 'see' (perception) to in the opposite lane
                 leader_request_message = Message.RequestOppositeLeaderMessage(self, self.lane_position,
                                                                               self._yield_time())
                 responses = self.lane.send_perception_opposite_leader_in_radius(leader_request_message,
-                                                                             self.config.max_perception_distance_between_leaders)
+                                                                                self.config.max_perception_distance_between_leaders)
                 if len(responses) > 0: # I don't get a response (i'm a flaw or the opposite leader is a flaw) but I'm 'seeing' another vehicle
                     print("HUBO RESPUESTA EN PARCEPCION")
                     response = responses[0]
@@ -131,7 +135,7 @@ class Vehicle:
            # else:
             #    return self.__process_yielding(None)
 
-
+            """
         # There is no leader in the opposite lane, we can resume
         # Regla 1.A
         # Regla 1.B no existe (No se si hay manera de probar esto en una sola intersección)
@@ -165,6 +169,10 @@ class Vehicle:
 
     def __process_yielding(self, response) -> bool:
 
+        if (self.id == "down_22_flaw"):
+            print("SOY 22")
+        if (self.id == "right_11"):
+            print("SOY 11")
         if str(type(self)) == '<class \'FlawVehicle.FlawVehicle\'>':
             self.is_flaw = True
         else: # Just send a message if is not a flaw
@@ -398,6 +406,12 @@ class Vehicle:
         return Message.ResponseNotEmergencyMessage(self)
 
     def __yield(self) -> bool:
+        if (self.id == "down_22_flaw"):
+            print("SOY 22")
+        if (self.id == "right_11"):
+            print("SOY 11")
+        if (self.id == "right_11"):
+            print("SOY 11")
         if not self.__is_yielding():
             if not self.__can_stop(): 
                 self.log.debug(self, "CANNOT YIELD, too close to brake")
@@ -438,6 +452,8 @@ class Vehicle:
     def __resume(self):
         if (self.id == "down_22_flaw"):
             print("SOY 22")
+        if (self.id == "right_11"):
+            print("SOY 11")
         if self.__is_yielding():
             try:
                 self.log.debug(self, "RESUME - distance to instersection", self.distance_to_intersection)

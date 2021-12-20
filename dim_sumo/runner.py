@@ -221,7 +221,7 @@ def get_options():
 def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 0.1, dWE = 0.1, pEW=0.1, pSN=0.1,
                                       dNS = 0.0, pEmergency=0.01, pFlaw=0.01, traffic_lights=False):
 
-    routefile= "data/ciudad2x2_semaforo.rou.xml" if traffic_lights else "data/cross.rou.xml"
+    routefile= "data/ciudad2x2_semaforo.rou.xml" if traffic_lights else "data/cross.rou2.xml"
     # first, generate the route file for this simulation
     generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS, pEmergency=pEmergency, pFlaw=pFlaw, routefile=routefile)
 

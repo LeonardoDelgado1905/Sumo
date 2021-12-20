@@ -138,12 +138,15 @@ class Lane:
     def send_perception_to_leader_in_radius(self, message, radius):
         # Get the leader in this lane
         leader = self.vehicles[0] if len(self.vehicles) > 0 else None
+
+
         # Check if it exists and is within the radius of the sender
-        if (not leader is None
-           and leader.distance_to_intersection < self.config.start_perception_at_distance_from_intersection
-           and leader.distance_to_vehicle(message.sender) <= radius):
-            # Send the message as requested
-            return leader.process_message(message)
+        if leader is not None:
+            distance_to_vehicle = leader.distance_to_vehicle(message.sender)
+            if (leader.distance_to_intersection < self.config.start_perception_at_distance_from_intersection
+               and distance_to_vehicle <= radius):
+                # Send the message as requested
+                return leader.process_message(message)
         return None
 
     def relay_message_to_next_upstream_in_radius(self, message, relaying_vehicle : Vehicle, radius):
