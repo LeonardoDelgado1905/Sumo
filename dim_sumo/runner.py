@@ -53,7 +53,7 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         dWE (float, optional): Percentage of deceivers expected in the W->E direction. Defaults to 0.0.
         dNS (float, optional): Percentage of deceivers expected in the N->S direction. Defaults to 0.0.
     """
-    random.seed(15)  # make tests reproducible
+    random.seed(8)  # make tests reproducible
     deceiver_suffix = "_dec"
     emergency_suffix = "_emergency"
     flaw_suffix = "_flaw"
@@ -221,7 +221,7 @@ def get_options():
 def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 0.1, dWE = 0.1, pEW=0.1, pSN=0.1,
                                       dNS = 0.0, pEmergency=0.01, pFlaw=0.01, traffic_lights=False):
 
-    routefile= "data/ciudad2x2_semaforo.rou.xml" if traffic_lights else "data/cross.rou2.xml"
+    routefile= "data/ciudad2x2_semaforo.rou.xml" if traffic_lights else "data/cross.rou.xml"
     # first, generate the route file for this simulation
     generate_routefile(pWE=pWE, pNS=pNS, pEW=pEW, pSN=pSN, dWE=dWE, dNS=dNS, pEmergency=pEmergency, pFlaw=pFlaw, routefile=routefile)
 
@@ -268,8 +268,8 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
     
-    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=360/3600, pWE=360/3600,
-                                      pSN=360/3600, pEW=360/3600, pEmergency=0.00, pFlaw=0.1, traffic_lights=False)
+    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=0/3600, pWE=0/3600,
+                                      pSN=0/3600, pEW=0/3600, pEmergency=0.00, pFlaw=1, traffic_lights=False)
 
 # this is the main entry point of this script
 if __name__ == "__main__":

@@ -75,7 +75,7 @@ class Lane:
         # Send the message to all the vehicles in the radius ignoring the sender
         responses = list()
         for vehicle in self.vehicles:
-            if vehicle != message.sender and vehicle.distance_to_vehicle(message.sender) <= radius:
+            if vehicle != message.sender and vehicle.distance_to_vehicle(message.sender) <= radius and not vehicle.is_flaw:
                 responses.append(vehicle.process_message(message))
 
         self.log.info("Leader: ", message.sender.id, " , respuestas recibidas: ", responses)
@@ -128,7 +128,8 @@ class Lane:
         # Get the leader in this lane
         leader = self.vehicles[0] if len(self.vehicles) > 0 else None
         # Check if it exists and is within the radius of the sender
-        if (not leader is None 
+        if (leader is not None
+           and "flaw" not in leader.id
            and leader.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection 
            and leader.distance_to_vehicle(message.sender) <= radius):
             # Send the message as requested
