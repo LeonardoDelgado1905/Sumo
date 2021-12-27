@@ -257,7 +257,7 @@ def main(options = None):
         sumoBinary = checkBinary('sumo-gui')
     
     generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=720/3600, pWE=720/3600,
-                                      pSN=720/3600, pEW=720/3600, pEmergency=0.01, traffic_lights=False)
+                                      pSN=720/3600, pEW=720/3600, pEmergency=0.01, traffic_lights=True)
 
 # this is the main entry point of this script
 if __name__ == "__main__":
