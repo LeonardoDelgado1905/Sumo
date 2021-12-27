@@ -77,7 +77,8 @@ class Vehicle:
             if self.waiting_time() < 12:
                 print(self.waiting_time())
                 return True
-
+        #if self.should_wait:
+        #    return self.__resume()
         #Cannot negociate, it's a flaw vehicle
         isFlaw = "_flaw" in self.id
         # Check if there is a leader in the opposite lane that we can negotiate with
@@ -85,12 +86,9 @@ class Vehicle:
         if self.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection:
 
             #if not isFlaw or self.distance_to_intersection < self.config.start_perception_at_distance_from_intersection:
-            if self.id == "right_85":
+            if self.id == "up_49_flaw":
                 print("uy")
-            if self.id == "right_81":
-                print("uy")
-            if self.id == "down_36":
-                print("uy")
+
             if isFlaw:
                 # If is a flaw vehilce and it's in a distance from the intersection his state should be Yielding
                 #self.state = Vehicle_State.YIELDING
@@ -136,9 +134,11 @@ class Vehicle:
                                                                               self._yield_time())
                 responses = self.lane.send_perception_opposite_leader_in_radius(leader_request_message,
                                                                                 self.config.max_perception_distance_between_leaders)
-                if (self.id == "left_24_flaw"):
-                    print("SOY 22")
+                if self.id == "up_74_flaw":
+                    print("uy")
                 if len(responses) > 0: # I don't get a response (i'm a flaw or the opposite leader is a flaw) but I'm 'seeing' another vehicle
+                    if self.id == "up_49_flaw" or self.id == "left_97_flaw":
+                        print("uy")
                     #print("HUBO RESPUESTA EN PARCEPCION")
                     response = responses[0]
                     if isFlaw:
@@ -146,9 +146,15 @@ class Vehicle:
                         #If there is a leader and i'm a flaw i'll handle my yielding
                         return self.__process_gaining_priority(response)
                     else:
+                        if self.should_wait:
+                            print("yo identificado con ", self.id, " debería parar: ", self.opposite_flaw_yield_time())
+                            self.state = Vehicle_State.AUTO
+                            self.__yield()
                         self.handle_flaw_opposite_leader()
-                        if("up" in self.id):
+                        if("right" in self.id):
                             print("El azulito lleva esperando", self.opposite_flaw_yield_time())
+
+
                         #If there is a flaw leader then i'll gain priority and thell the convoy there's a flaw
                         #print("Hay una falla al otro lado")
                         if self.state == Vehicle_State.YIELDING:
@@ -196,7 +202,8 @@ class Vehicle:
         return True
 
     def __process_yielding(self, response) -> bool:
-
+        if self.id == "up_47":
+            print("uy")
         if str(type(self)) == '<class \'FlawVehicle.FlawVehicle\'>':
             self.is_flaw = True
         else: # Just send a message if is not a flaw
@@ -207,14 +214,13 @@ class Vehicle:
                 if isinstance(r, Message.ResponseEmergencyMessage):
                     self.is_emergency = True
 
-        if self.id == "up_159":
-            print("uy")
         if str(type(self)) == '<class \'EmergencyVehicle.EmergencyVehicle\'>':
             #print("mi clase es: " + str(type(self)))
             self.is_emergency = True
         
         should_yield = self.__should_yield(response)
-        
+        if self.id == "right_50" or self.id == "right_45":
+            print("HMM")
         if should_yield and not self.is_emergency:
             # We are yielding, stop the vehicle if possible
             self.__yield()
@@ -298,13 +304,10 @@ class Vehicle:
 
     def __process_gaining_priority(self, response) -> bool:
 
-        if self.id == "left_174_flaw":
+        if self.id == "up_392_flaw":
             print("uy")
-        if self.id == "right_85":
+        if self.id == "right_278_flaw":
             print("uy")
-        if self.id == "up_93_flaw":
-            print("uy")
-
         if self.is_emergency and response.sender.is_emergency and self.decision is None:
             self.decision = bool(random.randint(0, 1))
             response.sender.decision = not self.decision
@@ -314,16 +317,24 @@ class Vehicle:
             self.decision = False
         elif self.should_wait:
             self.decision = False
+            response.sender.decision = True
         elif response.sender.should_wait:
             self.decision = True
+            response.sender.decision = False
         elif self.is_flaw and response.sender.state != Vehicle_State.YIELDING and response.sender.state != Vehicle_State.WAITING and not response.sender.is_flaw:
             self.decision = False
+            response.sender.decision = True
+        #elif self.decision is None and self.is_flaw and not response.sender.is_flaw:
+        #    self.decision = False
         elif self.state == Vehicle_State.GAINING_PRIORITY and response.sender.state == Vehicle_State.GAINING_PRIORITY:
             self.decision = bool(random.randint(0, 1))
             response.sender.decision = not self.decision
-        elif self.is_flaw and response.sender.is_flaw:
+        elif self.decision is None and self.is_flaw and response.sender.is_flaw:
             self.decision = bool(random.randint(0, 1))
             response.sender.decision = not self.decision
+        elif self.decision is None and self.is_flaw:
+            self.decision = False
+            response.sender.decision = True
 
 
 
@@ -373,6 +384,8 @@ class Vehicle:
             print("uy")
         if self.id == "down_36":
             print("uy")
+        if self.should_wait:
+            return True
         if self.is_flaw and not response.sender.should_wait:
             print(self.id, "FALLA VA A PARAR")
             return True
@@ -456,12 +469,17 @@ class Vehicle:
         return
 
     def handle_flaw_opposite_leader(self):
+
+        if self.id == "right_50" or self.id == "right_45":
+            print("HMM")
         upstream_responses = self.lane.send_message_in_radius(Message.RequestFollowerMessage(self),
                                                               self.config.max_comunication_distance_upstream)
         if len(upstream_responses) > 0:
             next_leader = upstream_responses[0].sender
+            if self.opposite_flaw_yielding_since_second == -1:
+                self.opposite_flaw_yielding_since_second = self.config.current_time_seconds
             init_waiting = self.opposite_flaw_yielding_since_second
-            next_leader.opposite_flaw_yielding_since_second = init_waiting if init_waiting != -1 else self.config.current_time_seconds
+            next_leader.opposite_flaw_yielding_since_second = init_waiting
             if self.lane.last_vehicle_convoy is not None and self.lane.last_vehicle_convoy == self\
                     or self.opposite_flaw_yield_time() > self.config.flaw_timeout_in_seconds and not "flaw" in next_leader.id:
                 next_leader.should_wait = True
@@ -492,8 +510,6 @@ class Vehicle:
         return Message.ResponseNotEmergencyMessage(self)
 
     def __yield(self) -> bool:
-        if (self.id == "left_24_flaw"):
-            print("SOY 22")
         if not self.__is_yielding():
             if not self.__can_stop(): 
                 self.log.debug(self, "CANNOT YIELD, too close to brake")
