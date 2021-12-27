@@ -137,6 +137,10 @@ class Vehicle:
                 if self.id == "up_74_flaw":
                     print("uy")
                 if len(responses) > 0: # I don't get a response (i'm a flaw or the opposite leader is a flaw) but I'm 'seeing' another vehicle
+                    if self.id == "right_60":
+                        print("uy")
+                    if self.id == "right_50" or self.id == "right_19":
+                        print("uy")
                     if self.id == "up_49_flaw" or self.id == "left_97_flaw":
                         print("uy")
                     #print("HUBO RESPUESTA EN PARCEPCION")
@@ -146,10 +150,10 @@ class Vehicle:
                         #If there is a leader and i'm a flaw i'll handle my yielding
                         return self.__process_gaining_priority(response)
                     else:
-                        if self.should_wait:
-                            print("yo identificado con ", self.id, " debería parar: ", self.opposite_flaw_yield_time())
-                            self.state = Vehicle_State.AUTO
-                            self.__yield()
+                        #if self.should_wait:
+                        #    print("yo identificado con ", self.id, " debería parar: ", self.opposite_flaw_yield_time())
+                        #    self.state = Vehicle_State.AUTO
+                        #    self.__yield()
                         self.handle_flaw_opposite_leader()
                         if("right" in self.id):
                             print("El azulito lleva esperando", self.opposite_flaw_yield_time())
@@ -304,7 +308,7 @@ class Vehicle:
 
     def __process_gaining_priority(self, response) -> bool:
 
-        if self.id == "up_392_flaw":
+        if self.id == "down_42":
             print("uy")
         if self.id == "right_278_flaw":
             print("uy")
