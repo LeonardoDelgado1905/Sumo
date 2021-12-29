@@ -31,6 +31,8 @@ import datetime
 from Simulation import Simulation
 import matplotlib.pyplot as plt
 from utils import mean_confidence_interval
+import xml.etree.ElementTree as ET
+import json
 
 # we need to import python modules from the $SUMO_HOME/tools directory
 if 'SUMO_HOME' in os.environ:
@@ -229,7 +231,8 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
 #        <phase duration="6"  state="ryry"/>
 #    </tlLogic>
 
-def run(traffic_lights=False, trafficlights_flaws=0.25):
+
+def run(traffic_lights=False, trafficlights_flaws=0.25, city_size=2, density=1):
     """execute the TraCI control loop"""
     state = Simulation()
     total_trafficlights = list(traci.trafficlight.getIDList())
@@ -251,21 +254,33 @@ def run(traffic_lights=False, trafficlights_flaws=0.25):
 
     step_hot = 1000
     step_stop = 200
+
+    density_calc = mean_confidence_interval(state.city_density[step_hot:-step_stop])
+    flow = mean_confidence_interval(state.city_flow[step_hot:-step_stop])
+    vel = mean_confidence_interval(state.city_vel[step_hot:-step_stop])
+
+
     plt.plot(range(len(state.city_density[step_hot:-step_stop])), state.city_density[step_hot:-step_stop])
-    print("Average density City: ", mean_confidence_interval(state.city_density[step_hot:-step_stop]))
+    print("Average density City: ", density_calc)
     plt.title("density")
     plt.show()
+    plt.savefig(f'data/plots/density_{city_size}x{city_size}_{density}.png')
+    plt.clf()
     plt.plot(range(len(state.city_flow[step_hot:-step_stop])), state.city_flow[step_hot:-step_stop])
-    print("Average flow City: ", mean_confidence_interval(state.city_flow[step_hot:-step_stop]))
+    print("Average flow City: ", flow)
     plt.title("flow")
     plt.show()
+    plt.savefig(f'data/plots/flow_{city_size}x{city_size}_{density}.png')
+    plt.clf()
     plt.plot(range(len(state.city_vel[step_hot:-step_stop])), state.city_vel[step_hot:-step_stop])
-    print("Average velocity City: ", mean_confidence_interval(state.city_vel[step_hot:-step_stop]))
+    print("Average velocity City: ", vel)
     plt.title("vel")
     plt.show()
+    plt.savefig(f'data/plots/vel_plot_{city_size}x{city_size}_{density}.png')
+    plt.clf()
     traci.close()
     sys.stdout.flush()
-
+    return density_calc, flow, vel
 
 def old_run():
     """execute the TraCI control loop"""
@@ -313,11 +328,19 @@ def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 
 
     # this is the normal way of using traci. sumo is started as a
     # subprocess and then the python script connects and runs
-    traci.start([checkBinary('sumo-gui'), "-c", cfg_sumo_file,
-                "--collision.mingap-factor", "0",
-                "--step-length", "0.2",
-                "--tripinfo-output", output_path])
-    run(traffic_lights, trafficlights_flaws)
+    #traci.start([checkBinary('sumo-gui'), "-c", cfg_sumo_file,
+    #            "--collision.mingap-factor", "0",
+    #            "--step-length", "0.2",
+    #            "--tripinfo-output", output_path])
+
+    traci.start([sumoBinary, "-c", cfg_sumo_file,
+               "--collision.mingap-factor", "0",
+               "--step-length", "0.2",
+               "--tripinfo-output", output_path])
+
+    density = (pSN + pNS + pEW + pWE)/4
+    density_calc, flow, vel = run(traffic_lights, trafficlights_flaws, city_size=city_size, density=density)
+    return density_calc[1], flow[1], vel[1]
 
 
 def run_batch(sumoBinary, vph_combinations, dec_array, traffic_lights):
@@ -336,6 +359,54 @@ def run_batch(sumoBinary, vph_combinations, dec_array, traffic_lights):
                                                   traffic_lights=traffic_lights, city_size=5)
 
 
+def emergency_control():
+    tree = ET.parse('data/out-tripinfo.xml')
+    root = tree.getroot()
+
+    list_emergency_times = []
+    list_total_times = []
+    for tripinfo in root:
+        if "emergency" in tripinfo.attrib.get("id"):
+            list_emergency_times.append(float(tripinfo.attrib.get("waitingTime")))
+        list_total_times.append(float(tripinfo.attrib.get("waitingTime")))
+
+    waiting_times = mean_confidence_interval(list_total_times)
+    waiting_times_priority = mean_confidence_interval(list_emergency_times)
+    if len(list_emergency_times) > 0:
+        print("Promedio de tiempo de espera en segundos para los carros de prioridad: ",
+              waiting_times_priority)
+    print("Promedio de tiempo de espera en segundos para todos los carros: ",
+          waiting_times)
+
+    return waiting_times[1], waiting_times_priority[1]
+
+
+def generate_plots(velocities, flows, waiting_times, waiting_times_priority, city_size):
+    name = f'_{city_size}x{city_size}'
+    print(velocities)
+    print(flows)
+    print(waiting_times)
+    print(waiting_times_priority)
+    densities = np.arange(0.0, 1.1, 0.1)
+    plt.plot(densities, flows)
+    plt.show()
+    plt.savefig(f'data/plots/results/densityXflow{name}.png')
+    plt.clf()
+    plt.plot(densities[1:], velocities)
+    plt.show()
+    plt.savefig(f'data/plots/results/densityXvelocity{name}.png')
+    plt.clf()
+    plt.plot(densities, waiting_times)
+    plt.show()
+    plt.savefig(f'data/plots/results/densityXwaiting{name}.png')
+    plt.clf()
+    if len(waiting_times_priority) > 1:
+        plt.plot(densities, waiting_times_priority)
+        plt.show()
+        plt.savefig(f'data/plots/results/densityXwaitingprior{name}.png')
+        plt.clf()
+
+
 def main(options = None):
      # this script has been called from the command line. It will start sumo as a
     # server, then connect and run
@@ -351,9 +422,40 @@ def main(options = None):
 
     else:
         sumoBinary = checkBinary('sumo-gui')
-    
-    generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=3600/3600, pWE=3600/3600,
-                                      pSN=3600/3600, pEW=3600/3600, pEmergency=0.01, traffic_lights=False, trafficlights_flaws=0.25, city_size=10)
+
+    simulation_stats = {
+        "velocities": [],
+        "flows": [0],
+        "waiting_times": [0],
+        "waiting_times_priority": [0]
+    }
+
+    city_size = 2
+    try:
+        with open(f'data/simulation_stats{city_size}x{city_size}.txt', 'r') as outfile:
+            simulation_stats = json.load(outfile)
+            print(simulation_stats)
+    except NameError:
+        print(NameError)
+        with open(f'data/simulation_stats{city_size}x{city_size}.txt', 'w+') as outfile:
+            json.dump(simulation_stats, outfile)
+    with open(f'data/simulation_stats{city_size}x{city_size}.txt', 'w') as outfile:
+        for d in np.arange(0.1*len(simulation_stats["flows"]), 1.1, 0.1):
+            print(simulation_stats)
+            outfile.seek(0)
+            density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo'), "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=d, pWE=d,
+                                              pSN=d, pEW=d, pEmergency=0.00, traffic_lights=False, trafficlights_flaws=0.25, city_size=city_size)
+
+            waiting_normal, waiting_priority = emergency_control()
+            simulation_stats["velocities"].append(velocity)
+            simulation_stats["flows"].append(flow)
+            simulation_stats["waiting_times"].append(waiting_normal)
+            if waiting_priority == waiting_priority:
+                simulation_stats["waiting_times_priority"].append(waiting_priority)
+            json.dump(simulation_stats, outfile)
+
+
+        generate_plots(velocities=simulation_stats["velocities"], flows=simulation_stats["flows"], waiting_times=simulation_stats["waiting_times"], waiting_times_priority=simulation_stats["waiting_times_priority"], city_size=city_size)
 
 # this is the main entry point of this script
 if __name__ == "__main__":
