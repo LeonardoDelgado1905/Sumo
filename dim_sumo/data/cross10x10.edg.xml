@@ -69,7 +69,7 @@
 	<edge from="62"  id="outl3"  to="61" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="73"  id="73to74"  to="74" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="74"  id="74to75"  to="75" priority="78" numLanes="1" speed="19.444"/>
-	<edge from="75"  id="75to46"  to="76" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="75"  id="75to76"  to="76" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="76"  id="76to77"  to="77" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="77"  id="77to78"  to="78" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="78"  id="78to79"  to="79" priority="78" numLanes="1" speed="19.444"/>
