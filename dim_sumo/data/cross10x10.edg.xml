@@ -116,7 +116,7 @@
 	<edge from="14"  id="14to26"  to="26" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="26"  id="26to38"  to="38" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="38"  id="38to50"  to="50" priority="78" numLanes="1" speed="19.444"/>
-	<edge from="50"  id="40to62"  to="62" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="50"  id="50to62"  to="62" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="62"  id="62to74"  to="74" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="74"  id="74to86"  to="86" priority="78" numLanes="1" speed="19.444"/>
 	<edge from="86"  id="86to98"  to="98" priority="78" numLanes="1" speed="19.444"/>
