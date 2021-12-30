@@ -65,7 +65,7 @@ def generate_routefile(seconds = 3600, pWE = 0.1, pNS = 0.1, pSN=0.1, pEW=0.1, d
         dWE (float, optional): Percentage of deceivers expected in the W->E direction. Defaults to 0.0.
         dNS (float, optional): Percentage of deceivers expected in the N->S direction. Defaults to 0.0.
     """
-    random.seed(15)  # make tests reproducible
+    random.seed(8)  # make tests reproducible
     deceiver_suffix = "_dec"
     emergency_suffix = "_emergency"
     car_following_model = "IDM" # Suggested options:  IDM, ACC
@@ -264,19 +264,19 @@ def run(traffic_lights=False, trafficlights_flaws=0.25, city_size=2, density=1):
     print("Average density City: ", density_calc)
     plt.title("density")
     plt.show()
-    plt.savefig(f'data/plots/density_{city_size}x{city_size}_{density}.png')
+    plt.savefig(f'data/plots/{city_size}/density_{city_size}x{city_size}_{density}.png')
     plt.clf()
     plt.plot(range(len(state.city_flow[step_hot:-step_stop])), state.city_flow[step_hot:-step_stop])
     print("Average flow City: ", flow)
     plt.title("flow")
     plt.show()
-    plt.savefig(f'data/plots/flow_{city_size}x{city_size}_{density}.png')
+    plt.savefig(f'data/plots/{city_size}/flow_{city_size}x{city_size}_{density}.png')
     plt.clf()
     plt.plot(range(len(state.city_vel[step_hot:-step_stop])), state.city_vel[step_hot:-step_stop])
     print("Average velocity City: ", vel)
     plt.title("vel")
     plt.show()
-    plt.savefig(f'data/plots/vel_plot_{city_size}x{city_size}_{density}.png')
+    plt.savefig(f'data/plots/{city_size}/vel_plot_{city_size}x{city_size}_{density}.png')
     plt.clf()
     traci.close()
     sys.stdout.flush()
@@ -340,7 +340,7 @@ def generate_traffic_and_execute_sumo(sumoBinary, output_path, pWE = 0.1, pNS = 
 
     density = (pSN + pNS + pEW + pWE)/4
     density_calc, flow, vel = run(traffic_lights, trafficlights_flaws, city_size=city_size, density=density)
-    return density_calc[1], flow[1], vel[1]
+    return density_calc[0], flow[0], vel[0]
 
 
 def run_batch(sumoBinary, vph_combinations, dec_array, traffic_lights):
@@ -378,10 +378,10 @@ def emergency_control():
     print("Promedio de tiempo de espera en segundos para todos los carros: ",
           waiting_times)
 
-    return waiting_times[1], waiting_times_priority[1]
+    return waiting_times[0], waiting_times_priority[0]
 
 
-def generate_plots(velocities, flows, waiting_times, waiting_times_priority, city_size):
+def generate_plots(velocities, flows, waiting_times, waiting_times_priority, city_size, suffix):
     name = f'_{city_size}x{city_size}'
     print(velocities)
     print(flows)
@@ -390,22 +390,64 @@ def generate_plots(velocities, flows, waiting_times, waiting_times_priority, cit
     densities = np.arange(0.0, 1.1, 0.1)
     plt.plot(densities, flows)
     plt.show()
-    plt.savefig(f'data/plots/results/densityXflow{name}.png')
+    plt.savefig(f'data/plots/results/densityXflow{name}{suffix}.png')
     plt.clf()
     plt.plot(densities[1:], velocities)
     plt.show()
-    plt.savefig(f'data/plots/results/densityXvelocity{name}.png')
+    plt.savefig(f'data/plots/results/densityXvelocity{name}{suffix}.png')
     plt.clf()
     plt.plot(densities, waiting_times)
     plt.show()
-    plt.savefig(f'data/plots/results/densityXwaiting{name}.png')
+    plt.savefig(f'data/plots/results/densityXwaiting{name}{suffix}.png')
     plt.clf()
     if len(waiting_times_priority) > 1:
         plt.plot(densities, waiting_times_priority)
         plt.show()
-        plt.savefig(f'data/plots/results/densityXwaitingprior{name}.png')
+        plt.savefig(f'data/plots/results/densityXwaitingprior{name}{suffix}.png')
         plt.clf()
 
+def run_experiment(city_size=2, density_emergency=0.01, traffic_lights=False):
+    simulation_stats = {
+        "velocities": [],
+        "flows": [0],
+        "waiting_times": [0],
+        "waiting_times_priority": [0]
+    }
+
+    name_emergency = "_emergency" if density_emergency != -1 else ""
+    name_traffic_lights = "_trafficlights" if traffic_lights else ""
+    try:
+        with open(f'data/simulation_stats{city_size}x{city_size}{name_emergency}{name_traffic_lights}.txt', 'r') as outfile:
+            simulation_stats = json.load(outfile)
+            print(simulation_stats)
+    except:
+        with open(f'data/simulation_stats{city_size}x{city_size}{name_emergency}{name_traffic_lights}.txt', 'w+') as outfile:
+            json.dump(simulation_stats, outfile)
+    with open(f'data/simulation_stats{city_size}x{city_size}{name_emergency}{name_traffic_lights}.txt', 'w') as outfile:
+        for d in np.arange(0.1 * len(simulation_stats["flows"]), 1.1, 0.1):
+            print(simulation_stats)
+            density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo'),
+                                                                             "data/out-tripinfo.xml", dNS=0.0, dWE=0.0,
+                                                                             pNS=d, pWE=d,
+                                                                             pSN=d, pEW=d, pEmergency=density_emergency,
+                                                                             traffic_lights=False,
+                                                                             trafficlights_flaws=0.25,
+                                                                             city_size=city_size)
+
+            waiting_normal, waiting_priority = emergency_control()
+            simulation_stats["velocities"].append(velocity)
+            simulation_stats["flows"].append(flow)
+            simulation_stats["waiting_times"].append(waiting_normal)
+            if waiting_priority == waiting_priority:
+                simulation_stats["waiting_times_priority"].append(waiting_priority)
+            outfile.seek(0)
+            json.dump(simulation_stats, outfile)
+
+        outfile.seek(0)
+        json.dump(simulation_stats, outfile)
+        generate_plots(velocities=simulation_stats["velocities"], flows=simulation_stats["flows"],
+                       waiting_times=simulation_stats["waiting_times"],
+                       waiting_times_priority=simulation_stats["waiting_times_priority"], city_size=city_size, suffix=name_emergency+name_traffic_lights)
 
 def main(options = None):
      # this script has been called from the command line. It will start sumo as a
@@ -423,39 +465,10 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
 
-    simulation_stats = {
-        "velocities": [],
-        "flows": [0],
-        "waiting_times": [0],
-        "waiting_times_priority": [0]
-    }
-
-    city_size = 2
-    try:
-        with open(f'data/simulation_stats{city_size}x{city_size}.txt', 'r') as outfile:
-            simulation_stats = json.load(outfile)
-            print(simulation_stats)
-    except NameError:
-        print(NameError)
-        with open(f'data/simulation_stats{city_size}x{city_size}.txt', 'w+') as outfile:
-            json.dump(simulation_stats, outfile)
-    with open(f'data/simulation_stats{city_size}x{city_size}.txt', 'w') as outfile:
-        for d in np.arange(0.1*len(simulation_stats["flows"]), 1.1, 0.1):
-            print(simulation_stats)
-            outfile.seek(0)
-            density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo'), "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=d, pWE=d,
-                                              pSN=d, pEW=d, pEmergency=0.00, traffic_lights=False, trafficlights_flaws=0.25, city_size=city_size)
-
-            waiting_normal, waiting_priority = emergency_control()
-            simulation_stats["velocities"].append(velocity)
-            simulation_stats["flows"].append(flow)
-            simulation_stats["waiting_times"].append(waiting_normal)
-            if waiting_priority == waiting_priority:
-                simulation_stats["waiting_times_priority"].append(waiting_priority)
-            json.dump(simulation_stats, outfile)
+    run_experiment(city_size=2, density_emergency=0.01, traffic_lights=False)
 
 
-        generate_plots(velocities=simulation_stats["velocities"], flows=simulation_stats["flows"], waiting_times=simulation_stats["waiting_times"], waiting_times_priority=simulation_stats["waiting_times_priority"], city_size=city_size)
+
 
 # this is the main entry point of this script
 if __name__ == "__main__":
