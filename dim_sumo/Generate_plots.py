@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 def generate(velocities, flows, waiting_times):
     densities = np.arange(0.0, 1.1, 0.1)
     plt.plot(densities, flows)
+    plt.plot(densities, flows_emergincy)
     plt.show()
     plt.plot(densities[1:], velocities)
     plt.show()
