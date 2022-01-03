@@ -124,6 +124,27 @@ class Lane:
 
         return responses
 
+    def send_perception_next_last_follower_in_radius(self, message, radius):
+        # Find the endpoing closest to the sender
+        min_index = 0
+        min_distance = message.sender.distance_to_point(self.shape[0])
+        for i in range(1, len(self.shape)):
+            distance = message.sender.distance_to_point(self.shape[i])
+            if distance < min_distance:
+                min_index = i
+                min_distance = distance
+
+        # Send the message to the leaders in lanes that are opposite to the endpoint found
+        responses = list()
+        for opposite_lane in self.adjacent_lanes[min_index]:
+            response = opposite_lane.send_perception_to_last_follower_in_radius(message, radius)
+            if response is not None:
+                responses.append(response)
+
+        # self.log.info(message.sender.id, " , mensajes: ", responses)
+
+        return responses
+
     def send_message_to_leader_in_radius(self, message, radius):
         # Get the leader in this lane
         leader = self.vehicles[0] if len(self.vehicles) > 0 else None
@@ -148,6 +169,19 @@ class Lane:
                and distance_to_vehicle <= radius):
                 # Send the message as requested
                 return leader.process_message(message)
+        return None
+
+    def send_perception_to_last_follower_in_radius(self, message, radius):
+        # Get the leader in this lane
+        last_follower = self.vehicles[-1] if len(self.vehicles) > 0 else None
+
+        # Check if it exists and is within the radius of the sender
+        if last_follower is not None:
+            distance_to_vehicle = last_follower.distance_to_vehicle(message.sender)
+            if (last_follower.distance_to_intersection < self.config.start_perception_at_distance_from_intersection
+                    and distance_to_vehicle <= radius):
+                # Send the message as requested
+                return last_follower.process_message(message)
         return None
 
     def relay_message_to_next_upstream_in_radius(self, message, relaying_vehicle : Vehicle, radius):

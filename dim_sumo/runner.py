@@ -481,7 +481,7 @@ def main(options = None):
     #                                  pSN=3600/3600, pEW=3600/3600, pEmergency=0.00, pFlaw=.7, traffic_lights=False)
 
 
-    run_experiment(city_size=2, density_emergency=-1, traffic_lights=True)
+    run_experiment(city_size=10, density_emergency=-1, traffic_lights=True)
 
 # this is the main entry point of this script
 if __name__ == "__main__":
