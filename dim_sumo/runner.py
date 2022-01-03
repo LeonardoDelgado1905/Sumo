@@ -248,12 +248,13 @@ def run(traffic_lights=False, trafficlights_flaws=0.25, city_size=2, density=1):
     while traci.simulation.getMinExpectedNumber() > 0:
         traci.simulationStep()
         state.step(step, traffic_lights)
-        if step == 15000:
-           break
+        if step == 20000:
+            print("OMG SUPERASTE LOS 20000")
+            break
         step += 1
-
+    print("*********************************************", step)
     step_hot = 1000
-    step_stop = 200
+    step_stop = 0
 
     density_calc = mean_confidence_interval(state.city_density[step_hot:-step_stop])
     flow = mean_confidence_interval(state.city_flow[step_hot:-step_stop])
@@ -425,12 +426,13 @@ def run_experiment(city_size=2, density_emergency=0.01, traffic_lights=False):
             json.dump(simulation_stats, outfile)
     with open(f'data/simulation_stats{city_size}x{city_size}{name_emergency}{name_traffic_lights}.txt', 'w') as outfile:
         for d in np.arange(0.1 * len(simulation_stats["flows"]), 1.1, 0.1):
+            print("vamos a comenzar desde la densidad", d)
             print(simulation_stats)
             density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo'),
                                                                              "data/out-tripinfo.xml", dNS=0.0, dWE=0.0,
                                                                              pNS=d, pWE=d,
                                                                              pSN=d, pEW=d, pEmergency=density_emergency,
-                                                                             traffic_lights=False,
+                                                                             traffic_lights=traffic_lights,
                                                                              trafficlights_flaws=0.25,
                                                                              city_size=city_size)
 
@@ -465,7 +467,7 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
 
-    run_experiment(city_size=2, density_emergency=0.01, traffic_lights=False)
+    run_experiment(city_size=2, density_emergency=0.00, traffic_lights=False)
 
 
 
