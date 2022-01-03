@@ -480,7 +480,6 @@ def main(options = None):
     #generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=3600/3600, pWE=3600/3600,
     #                                  pSN=3600/3600, pEW=3600/3600, pEmergency=0.00, pFlaw=.7, traffic_lights=False)
 
-
     run_experiment(city_size=10, density_emergency=-1, traffic_lights=True)
 
 # this is the main entry point of this script
