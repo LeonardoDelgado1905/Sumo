@@ -91,10 +91,27 @@ class Vehicle:
             # Should I wait becouse the next line is full?
             leader_request_message = Message.RequestNextLastFollowerMessage(self, self.lane_position,
                                                                             self._yield_time())
-            responses = self.lane.send_perception_next_last_follower_in_radius(leader_request_message,
-                                                                               self.config.max_perception_distance_between_leaders)
-            if len(responses) > 0:
+            responses = self.lane.send_message_next_last_follower_in_radius(leader_request_message,
+                                                                               self.config.max_comunication_distance_next_lane)
+
+            if self.id == 'up1_1710' or self.id == 'right5_1404' or self.id == 'left1_1455' or self.id == 'down5_1569':
+                print("Voy a fallar")
+            if len(responses) > 0 and responses[0].stopped:
                 print("He encontrado respuestas así que probablemente no debería pasar")
+                self.__yield()
+                self.should_wait = True
+                return True
+            else:
+                leader_request_message = Message.RequestNextLastFollowerMessage(self, self.lane_position,
+                                                                                self._yield_time())
+                responses = self.lane.send_perception_next_last_follower_in_radius(leader_request_message,
+                                                                                self.config.max_perception_distance_next_lane)
+                if len(responses) > 0 and responses[0].stopped:
+                    self.__yield()
+                    self.should_wait = True
+                    return True
+                else:
+                    self.should_wait = False
 
 
             #if not isFlaw or self.distance_to_intersection < self.config.start_perception_at_distance_from_intersection:
@@ -465,6 +482,9 @@ class Vehicle:
         if type(message) is Message.RequestEmergencyMessage:
             return self.__process_request_emergency_message(message)
 
+        if type(message) is Message.RequestNextLastFollowerMessage:
+            return self.__process_request_next_last_follower_message(message)
+
         #print(self)
 
         return
@@ -510,7 +530,12 @@ class Vehicle:
             return Message.ResponseEmergencyMessage(self)
         return Message.ResponseNotEmergencyMessage(self)
 
+    def __process_request_next_last_follower_message(self, message):
+        return Message.ResponseNextLastFollowerMessage(self, self.lane_position, self.__is_yielding() or (self.speed < 2), self._yield_time(), self.__can_stop())
+
     def __yield(self) -> bool:
+        if self.id == 'up1_1710' or self.id == 'right5_1404' or self.id == 'left1_1455' or self.id == 'down5_1569':
+            print("Voy a fallar")
         if not self.__is_yielding():
             if not self.__can_stop(): 
                 self.log.debug(self, "CANNOT YIELD, too close to brake")
@@ -533,14 +558,15 @@ class Vehicle:
     def __can_stop(self):
         if self.speed == 0.0 or self.__is_yielding() or self.__is_gaining_priority():
             return True
-        can_stop = self.distance_to_intersection - self.config.min_braking_distance_to_intersection >= self.__min_breaking_distance()
+        min_breaking_distance = self.__min_breaking_distance()
+        can_stop = self.distance_to_intersection - self.config.min_braking_distance_to_intersection >= min_breaking_distance
         return can_stop
 
     def __min_breaking_distance(self):
         if self.speed == 0.0:
             return 0
         min_stop_time = self.__min_breaking_time()
-        return max(self.speed, self.config.stopping_time_delay * self.speed + self.speed * min_stop_time + (-1 * self.max_decceleration * min_stop_time ** 2)/2)
+        return max(self.speed, self.speed * min_stop_time + (-1 * self.max_decceleration * min_stop_time ** 2)/2)
 
     def __min_breaking_time(self):
         """Calculates the minimum time that the vehicles needs to stop given its maximum deceleration and a base time

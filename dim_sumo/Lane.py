@@ -187,15 +187,17 @@ class Lane:
         return None
 
     def send_message_to_last_follower_in_radius(self, message, radius):
+        if message.sender.id == 'up1_1710' or message.sender.id == 'right5_1404' or message.sender.id == 'left1_1455' or message.sender.id == 'down5_1569':
+            print("Voy a fallar")
         # Get the leader in this lane
         last_follower = self.vehicles[-1] if len(self.vehicles) > 0 else None
         # Check if it exists and is within the radius of the sender
         if (last_follower is not None
            and "flaw" not in last_follower.id
-           and leader.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection
-           and leader.distance_to_vehicle(message.sender) <= radius):
+           and self.lane_length - last_follower.distance_to_intersection < self.config.start_comunication_next_lane
+           and last_follower.distance_to_vehicle(message.sender) <= radius):
             # Send the message as requested
-            return leader.process_message(message)
+            return last_follower.process_message(message)
         return None
 
     def send_perception_to_leader_in_radius(self, message, radius):
@@ -211,13 +213,15 @@ class Lane:
         return None
 
     def send_perception_to_last_follower_in_radius(self, message, radius):
+        if message.sender.id == 'up1_1710' or message.sender.id == 'right5_1404' or message.sender.id == 'left1_1455' or message.sender.id == 'down5_1569':
+            print("Voy a fallar")
         # Get the last follower in this lane
         last_follower = self.vehicles[-1] if len(self.vehicles) > 0 else None
 
         # Check if it exists and is within the radius of the sender
         if last_follower is not None:
             distance_to_vehicle = last_follower.distance_to_vehicle(message.sender)
-            if (last_follower.distance_to_intersection < self.config.start_perception_at_distance_from_intersection
+            if (self.lane_length - last_follower.distance_to_intersection < self.config.start_perception_next_lane
                     and distance_to_vehicle <= radius):
                 # Send the message as requested
                 return last_follower.process_message(message)

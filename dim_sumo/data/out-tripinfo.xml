@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2022-01-03 17:22:26 by Eclipse SUMO GUI Version 1.10.0
+<!-- generated on Tue Jan  4 11:17:44 2022 by Eclipse SUMO GUI Version 1.6.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="data/cross5x5.net.xml"/>
-        <route-files value="data/cross5x5.rou.xml"/>
+        <net-file value="data/cross10x10.net.xml"/>
+        <route-files value="data/cross10x10.rou.xml"/>
     </input>
 
     <output>
@@ -27,7 +27,7 @@
     </report>
 
     <traci_server>
-        <remote-port value="35115"/>
+        <remote-port value="55402"/>
     </traci_server>
 
     <gui_only>
@@ -38,4 +38,3 @@
 -->
 
 <tripinfos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/tripinfo_file.xsd">
-</tripinfos>

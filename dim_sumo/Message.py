@@ -100,3 +100,17 @@ class ResponseOppositeLeaderMessage(OppositeLeaderMessage):
 
     def __repr__(self):
         return f"{OppositeLeaderMessage.__repr__(self)} - stopped? {self.stopped} - can_brake? {self.can_brake}"
+
+
+class ResponseNextLastFollowerMessage(NextLastFollowerMessage):
+
+    def __init__(self, vehicle, distance_to_intersection, stopped, wait_time, can_brake):
+        NextLastFollowerMessage.__init__(self, vehicle, distance_to_intersection, wait_time)
+        self.stopped = stopped
+        self.can_brake = can_brake
+
+    def __str__(self):
+        return f"{NextLastFollowerMessage.__str__(self)} - stopped? {self.stopped} - can_brake? {self.can_brake}"
+
+    def __repr__(self):
+        return f"{NextLastFollowerMessage.__repr__(self)} - stopped? {self.stopped} - can_brake? {self.can_brake}"

@@ -479,7 +479,7 @@ def main(options = None):
         sumoBinary = checkBinary('sumo-gui')
 
     generate_traffic_and_execute_sumo(checkBinary('sumo-gui'), "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=3600/3600, pWE=3600/3600,
-                                      pSN=3600/3600, pEW=3600/3600, pEmergency=0.00, pFlaw=0.0, traffic_lights=False, trafficlights_flaws=0.0, city_size=5)
+                                      pSN=3600/3600, pEW=3600/3600, pEmergency=0.00, pFlaw=0.0, traffic_lights=False, trafficlights_flaws=0.0, city_size=10)
 
     #run_experiment(city_size=2, density_emergency=-1, traffic_lights=False)
 
