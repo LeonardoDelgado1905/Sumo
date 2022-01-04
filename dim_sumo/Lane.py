@@ -33,7 +33,13 @@ class Lane:
                     adjacent.append(lane)
             self.adjacent_lanes.append(adjacent)
         #self.log.info(self.id, " adjacent to ", self.adjacent_lanes)
-    
+
+    def is_previous_or_next_lane(self, lane):
+        ans = False
+        for p in self.shape:
+            ans = ans or (p[0] == lane.shape[0][0] and p[0] == lane.shape[1][0]) or (p[1] == lane.shape[0][1] and p[1] == lane.shape[1][1])
+        return ans
+
     def is_adjacent_to_point(self, point):
         for p in self.shape:
             if np.linalg.norm(p - point) < self.config.max_distance_between_adjacent_lanes:
@@ -103,6 +109,28 @@ class Lane:
 
         return responses
 
+    def send_message_next_last_follower_in_radius(self, message, radius):
+        # Find the endpoing closest to the sender
+        min_index = 0
+        min_distance = message.sender.distance_to_point(self.shape[0])
+        for i in range(1, len(self.shape)):
+            distance = message.sender.distance_to_point(self.shape[i])
+            if distance < min_distance:
+                min_index = i
+                min_distance = distance
+
+        # Send the message to the leaders in lanes that are opposite to the endpoint found
+        responses = list()
+        for opposite_lane in self.adjacent_lanes[min_index]:
+            if self.is_previous_or_next_lane(opposite_lane):
+                response = opposite_lane.send_message_to_last_follower_in_radius(message, radius)
+                if response is not None:
+                    responses.append(response)
+
+        # self.log.info(message.sender.id, " , mensajes: ", responses)
+
+        return responses
+
     def send_perception_opposite_leader_in_radius(self, message, radius):
         # Find the endpoing closest to the sender
         min_index = 0
@@ -137,9 +165,10 @@ class Lane:
         # Send the message to the leaders in lanes that are opposite to the endpoint found
         responses = list()
         for opposite_lane in self.adjacent_lanes[min_index]:
-            response = opposite_lane.send_perception_to_last_follower_in_radius(message, radius)
-            if response is not None:
-                responses.append(response)
+            if self.is_previous_or_next_lane(opposite_lane):
+                response = opposite_lane.send_perception_to_last_follower_in_radius(message, radius)
+                if response is not None:
+                    responses.append(response)
 
         # self.log.info(message.sender.id, " , mensajes: ", responses)
 
@@ -157,11 +186,21 @@ class Lane:
             return leader.process_message(message)
         return None
 
+    def send_message_to_last_follower_in_radius(self, message, radius):
+        # Get the leader in this lane
+        last_follower = self.vehicles[-1] if len(self.vehicles) > 0 else None
+        # Check if it exists and is within the radius of the sender
+        if (last_follower is not None
+           and "flaw" not in last_follower.id
+           and leader.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection
+           and leader.distance_to_vehicle(message.sender) <= radius):
+            # Send the message as requested
+            return leader.process_message(message)
+        return None
+
     def send_perception_to_leader_in_radius(self, message, radius):
         # Get the leader in this lane
         leader = self.vehicles[0] if len(self.vehicles) > 0 else None
-
-
         # Check if it exists and is within the radius of the sender
         if leader is not None:
             distance_to_vehicle = leader.distance_to_vehicle(message.sender)
@@ -172,7 +211,7 @@ class Lane:
         return None
 
     def send_perception_to_last_follower_in_radius(self, message, radius):
-        # Get the leader in this lane
+        # Get the last follower in this lane
         last_follower = self.vehicles[-1] if len(self.vehicles) > 0 else None
 
         # Check if it exists and is within the radius of the sender

@@ -442,6 +442,7 @@ def run_experiment(city_size=2, density_emergency=0.01, traffic_lights=False):
                                                                              "data/out-tripinfo.xml", dNS=0.0, dWE=0.0,
                                                                              pNS=d, pWE=d,
                                                                              pSN=d, pEW=d, pEmergency=density_emergency,
+                                                                             pFlaw=0.0,
                                                                              traffic_lights=traffic_lights,
                                                                              trafficlights_flaws=0.25,
                                                                              city_size=city_size)
@@ -477,10 +478,10 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
 
-    #generate_traffic_and_execute_sumo(sumoBinary, "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=3600/3600, pWE=3600/3600,
-    #                                  pSN=3600/3600, pEW=3600/3600, pEmergency=0.00, pFlaw=.7, traffic_lights=False)
+    generate_traffic_and_execute_sumo(checkBinary('sumo-gui'), "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=3600/3600, pWE=3600/3600,
+                                      pSN=3600/3600, pEW=3600/3600, pEmergency=0.00, pFlaw=0.0, traffic_lights=False, trafficlights_flaws=0.0, city_size=5)
 
-    run_experiment(city_size=10, density_emergency=-1, traffic_lights=True)
+    #run_experiment(city_size=2, density_emergency=-1, traffic_lights=False)
 
 # this is the main entry point of this script
 if __name__ == "__main__":

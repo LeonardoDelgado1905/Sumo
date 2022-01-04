@@ -77,6 +77,9 @@ class Vehicle:
             if self.waiting_time() < 12:
                 print(self.waiting_time())
                 return True
+
+
+
         #if self.should_wait:
         #    return self.__resume()
         #Cannot negociate, it's a flaw vehicle
@@ -85,16 +88,21 @@ class Vehicle:
 
         if self.distance_to_intersection < self.config.start_negotiating_at_distance_from_intersection:
 
+            # Should I wait becouse the next line is full?
+            leader_request_message = Message.RequestNextLastFollowerMessage(self, self.lane_position,
+                                                                            self._yield_time())
+            responses = self.lane.send_perception_next_last_follower_in_radius(leader_request_message,
+                                                                               self.config.max_perception_distance_between_leaders)
+            if len(responses) > 0:
+                print("He encontrado respuestas así que probablemente no debería pasar")
+
+
             #if not isFlaw or self.distance_to_intersection < self.config.start_perception_at_distance_from_intersection:
-            if self.id == "up_49_flaw":
-                print("uy")
 
             if isFlaw:
                 # If is a flaw vehilce and it's in a distance from the intersection his state should be Yielding
                 #self.state = Vehicle_State.YIELDING
                 #return self.__process_yielding(None)
-                if self.id == "left_174_flaw":
-                    print("uy")
                 if self.state == Vehicle_State.GAINING_PRIORITY:
                     return self.__resume()
                 self.__yield()
@@ -127,22 +135,15 @@ class Vehicle:
                    # print("Vehículo: ", self.id, " esta en estado gaining priority a la negociacion")
                     return self.__process_gaining_priority(response)
             else:
-                if self.id == "up_159":
-                    print("uy")
+
                 # Find if there is a leader i can 'see' (perception) to in the opposite lane
                 leader_request_message = Message.RequestOppositeLeaderMessage(self, self.lane_position,
                                                                               self._yield_time())
                 responses = self.lane.send_perception_opposite_leader_in_radius(leader_request_message,
                                                                                 self.config.max_perception_distance_between_leaders)
-                if self.id == "up_74_flaw":
-                    print("uy")
+
                 if len(responses) > 0: # I don't get a response (i'm a flaw or the opposite leader is a flaw) but I'm 'seeing' another vehicle
-                    if self.id == "right_60":
-                        print("uy")
-                    if self.id == "right_50" or self.id == "right_19":
-                        print("uy")
-                    if self.id == "up_49_flaw" or self.id == "left_97_flaw":
-                        print("uy")
+
                     #print("HUBO RESPUESTA EN PARCEPCION")
                     response = responses[0]
                     if isFlaw:
@@ -155,10 +156,6 @@ class Vehicle:
                         #    self.state = Vehicle_State.AUTO
                         #    self.__yield()
                         self.handle_flaw_opposite_leader()
-                        if("right" in self.id):
-                            print("El azulito lleva esperando", self.opposite_flaw_yield_time())
-
-
                         #If there is a flaw leader then i'll gain priority and thell the convoy there's a flaw
                         #print("Hay una falla al otro lado")
                         if self.state == Vehicle_State.YIELDING:

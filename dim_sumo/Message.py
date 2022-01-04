@@ -71,10 +71,22 @@ class OppositeLeaderMessage(Message):
         self.distance_to_intersection = distance_to_intersection
         self.wait_time = wait_time
 
+class NextLastFollowerMessage(Message):
+
+    def __init__(self, vehicle, distance_to_intersection, wait_time):
+        Message.__init__(self, vehicle)
+        self.distance_to_intersection = distance_to_intersection
+        self.wait_time = wait_time
+
 class RequestOppositeLeaderMessage(OppositeLeaderMessage):
 
     def __init__(self, vehicle, distance_to_intersection, wait_time):
         OppositeLeaderMessage.__init__(self, vehicle, distance_to_intersection, wait_time)
+
+class RequestNextLastFollowerMessage(OppositeLeaderMessage):
+
+    def __init__(self, vehicle, distance_to_intersection, wait_time):
+        NextLastFollowerMessage.__init__(self, vehicle, distance_to_intersection, wait_time)
 
 class ResponseOppositeLeaderMessage(OppositeLeaderMessage):
 

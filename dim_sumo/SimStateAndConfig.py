@@ -7,8 +7,12 @@ class SimStateAndConfig:
         self.max_distance_between_adjacent_lanes = 20
         self.start_negotiating_at_distance_from_intersection = 50
         self.start_perception_at_distance_from_intersection = 30
+        self.start_comunication_next_lane = 30
+        self.start_perception_next_lane = 30
         self.max_comunication_distance_between_leaders = 150
         self.max_perception_distance_between_leaders = 30
+        self.max_comunication_distance_next_lane = 60
+        self.max_perception_distance_next_lane = 30
         self.max_comunication_distance_upstream = 60
         self.min_yield_timeout_in_seconds = 20
         self.yield_timeout_in_seconds = 150
