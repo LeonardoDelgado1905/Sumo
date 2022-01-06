@@ -267,7 +267,7 @@ def run(traffic_lights=False, trafficlights_flaws=0.25, city_size=2, density=1):
         step += 1
     print("*********************************************", step)
     step_hot = 1000
-    step_stop = 0
+    step_stop = 1
 
     density_calc = mean_confidence_interval(state.city_density[step_hot:-step_stop])
     flow = mean_confidence_interval(state.city_flow[step_hot:-step_stop])
@@ -438,7 +438,7 @@ def run_experiment(city_size=2, density_emergency=0.01, traffic_lights=False):
         for d in np.arange(0.1 * len(simulation_stats["flows"]), 1.1, 0.1):
             print("vamos a comenzar desde la densidad", d)
             print(simulation_stats)
-            density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo-gui'),
+            density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo'),
                                                                              "data/out-tripinfo.xml", dNS=0.0, dWE=0.0,
                                                                              pNS=d, pWE=d,
                                                                              pSN=d, pEW=d, pEmergency=density_emergency,
@@ -478,10 +478,11 @@ def main(options = None):
     else:
         sumoBinary = checkBinary('sumo-gui')
 
-    generate_traffic_and_execute_sumo(checkBinary('sumo-gui'), "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=3600/3600, pWE=3600/3600,
-                                      pSN=3600/3600, pEW=3600/3600, pEmergency=0.00, pFlaw=0.0, traffic_lights=False, trafficlights_flaws=0.0, city_size=10)
-
-    #run_experiment(city_size=2, density_emergency=-1, traffic_lights=False)
+    new_d = 0.9
+    density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo-gui'), "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=new_d, pWE=new_d,
+                                      pSN=new_d, pEW=new_d, pEmergency=0.09, pFlaw=0.0, traffic_lights=False, trafficlights_flaws=0.0, city_size=5)
+    print(density_calc, flow, velocity)
+    #run_experiment(city_size=10, density_emergency=0.09, traffic_lights=False)
 
 # this is the main entry point of this script
 if __name__ == "__main__":

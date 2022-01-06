@@ -94,7 +94,7 @@ class Vehicle:
             responses = self.lane.send_message_next_last_follower_in_radius(leader_request_message,
                                                                                self.config.max_comunication_distance_next_lane)
 
-            if self.id == 'up1_1710' or self.id == 'right5_1404' or self.id == 'left1_1455' or self.id == 'down5_1569':
+            if (self.id == 'down3_171' and '20to27' in self.lane.id) or self.id == 'left2_3041' or self.id == 'left2_878':
                 print("Voy a fallar")
             if len(responses) > 0 and responses[0].stopped:
                 print("He encontrado respuestas así que probablemente no debería pasar")
@@ -534,7 +534,7 @@ class Vehicle:
         return Message.ResponseNextLastFollowerMessage(self, self.lane_position, self.__is_yielding() or (self.speed < 2), self._yield_time(), self.__can_stop())
 
     def __yield(self) -> bool:
-        if self.id == 'up1_1710' or self.id == 'right5_1404' or self.id == 'left1_1455' or self.id == 'down5_1569':
+        if self.id == 'down3_171' or self.id == 'left2_3041':
             print("Voy a fallar")
         if not self.__is_yielding():
             if not self.__can_stop(): 
