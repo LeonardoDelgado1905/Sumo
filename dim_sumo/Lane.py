@@ -121,6 +121,8 @@ class Lane:
 
         # Send the message to the leaders in lanes that are opposite to the endpoint found
         responses = list()
+        if message.sender.id == 'left2_878':
+            print("Voy a fallar")
         for opposite_lane in self.adjacent_lanes[min_index]:
             if self.is_previous_or_next_lane(opposite_lane):
                 response = opposite_lane.send_message_to_last_follower_in_radius(message, radius)
@@ -187,7 +189,7 @@ class Lane:
         return None
 
     def send_message_to_last_follower_in_radius(self, message, radius):
-        if message.sender.id == 'up1_1710' or message.sender.id == 'right5_1404' or message.sender.id == 'left1_1455' or message.sender.id == 'down5_1569':
+        if message.sender.id == 'left2_878':
             print("Voy a fallar")
         # Get the leader in this lane
         last_follower = self.vehicles[-1] if len(self.vehicles) > 0 else None
