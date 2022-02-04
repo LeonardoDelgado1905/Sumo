@@ -11,8 +11,8 @@ class SimStateAndConfig:
         self.start_perception_next_lane = 30
         self.max_comunication_distance_between_leaders = 150
         self.max_perception_distance_between_leaders = 30
-        self.max_comunication_distance_next_lane = 60
-        self.max_perception_distance_next_lane = 30
+        self.max_comunication_distance_next_lane = 45
+        self.max_perception_distance_next_lane = 25
         self.lane_length = 500
         self.max_comunication_distance_upstream = 60
         self.min_yield_timeout_in_seconds = 20
