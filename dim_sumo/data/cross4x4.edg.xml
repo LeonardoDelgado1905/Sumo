@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/edges_file.xsd">
+
+   	<edge from="1"  id="1to2"  to="2" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="2"  id="2to3"  to="3" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="3"  id="3to4"  to="4" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="4"  id="4to5"  to="5" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="5"  id="outr1"  to="6" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="12"  id="12to11"  to="11" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="11"  id="11to10"  to="10" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="10"  id="10to9"  to="9" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="9"  id="9to8"  to="8" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="8"  id="outl1"  to="7" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="13"  id="13to14"  to="14" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="14"  id="14to15"  to="15" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="15"  id="15to16"  to="16" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="16"  id="16to17"  to="17" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="17"  id="outr2"  to="18" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="24"  id="24to23"  to="23" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="23"  id="23to22"  to="22" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="22"  id="22to21"  to="21" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="21"  id="21to20"  to="20" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="20"  id="outl2"  to="19" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="25"  id="25to2"  to="2" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="2"  id="2to8"  to="8" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="8"  id="8to14"  to="14" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="14"  id="14to20"  to="20" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="20"  id="outs1"  to="26" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="28" id="28to21" to="21" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="21"  id="21to15"  to="15" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="15"  id="15to9"  to="9" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="9"  id="9to3"  to="3" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="3"  id="outn1"  to="27" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="29"  id="29to4"  to="4" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="4"  id="4to10"  to="10" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="10"  id="10to16"  to="16" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="16"  id="16to22"  to="22" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="22"  id="outs2"  to="30" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="32" id="32to23" to="23" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="23"  id="23to17"  to="17" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="17"  id="17to11"  to="11" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="11"  id="11to5"  to="5" priority="78" numLanes="1" speed="19.444"/>
+	<edge from="5"  id="outn2"  to="31" priority="78" numLanes="1" speed="19.444"/>
+</edges>

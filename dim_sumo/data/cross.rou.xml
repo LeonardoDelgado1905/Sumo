@@ -1,0 +1,48 @@
+<routes>
+        <vType id="Car" length="5.00" minGap="2.50" maxSpeed="16.67" guiShape="passenger" carFollowModel="IDM" accel="0.8" decel="4.5" tau="1.0"/>
+
+        <route id="right" edges="1to2 2to3 outr" />
+        <route id="down" edges="9to2 2to6 outs" />
+        <route id="up" edges="12to7 7to3 outn" />
+        <route id="left" edges="8to7 7to6 outl" />
+        
+    <vehicle id="right_0_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="62" />
+    <vehicle id="down_1_flaw" type="Car" color="blue" route="down" departSpeed="desired" depart="346" />
+    <vehicle id="up_2_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="454" />
+    <vehicle id="right_3_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="549" />
+    <vehicle id="left_4_flaw" type="Car" color="blue" route="left" departSpeed="desired" depart="607" />
+    <vehicle id="up_5_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="671" />
+    <vehicle id="up_6_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="760" />
+    <vehicle id="right_7_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="795" />
+    <vehicle id="right_8_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="959" />
+    <vehicle id="left_9_flaw" type="Car" color="blue" route="left" departSpeed="desired" depart="996" />
+    <vehicle id="down_10_flaw" type="Car" color="blue" route="down" departSpeed="desired" depart="1088" />
+    <vehicle id="right_11_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="1215" />
+    <vehicle id="right_12_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="1218" />
+    <vehicle id="right_13_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="1264" />
+    <vehicle id="up_14_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="1321" />
+    <vehicle id="right_15_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="1570" />
+    <vehicle id="up_16_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="1602" />
+    <vehicle id="up_17_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="1625" />
+    <vehicle id="up_18_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="1672" />
+    <vehicle id="down_19_flaw" type="Car" color="blue" route="down" departSpeed="desired" depart="1748" />
+    <vehicle id="down_20_flaw" type="Car" color="blue" route="down" departSpeed="desired" depart="1968" />
+    <vehicle id="right_21_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="2052" />
+    <vehicle id="left_22_flaw" type="Car" color="blue" route="left" departSpeed="desired" depart="2058" />
+    <vehicle id="up_23_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="2232" />
+    <vehicle id="left_24_flaw" type="Car" color="blue" route="left" departSpeed="desired" depart="2289" />
+    <vehicle id="left_25_flaw" type="Car" color="blue" route="left" departSpeed="desired" depart="2369" />
+    <vehicle id="right_26_flaw" type="Car" color="blue" route="right" departSpeed="desired" depart="2439" />
+    <vehicle id="up_27_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="2508" />
+    <vehicle id="down_28_flaw" type="Car" color="blue" route="down" departSpeed="desired" depart="2537" />
+    <vehicle id="up_29_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="2752" />
+    <vehicle id="up_30_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="2766" />
+    <vehicle id="up_31_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="2803" />
+    <vehicle id="up_32_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="3082" />
+    <vehicle id="left_33_flaw" type="Car" color="blue" route="left" departSpeed="desired" depart="3097" />
+    <vehicle id="down_34_flaw" type="Car" color="blue" route="down" departSpeed="desired" depart="3113" />
+    <vehicle id="up_35_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="3281" />
+    <vehicle id="down_36_flaw" type="Car" color="blue" route="down" departSpeed="desired" depart="3302" />
+    <vehicle id="down_37_flaw" type="Car" color="blue" route="down" departSpeed="desired" depart="3313" />
+    <vehicle id="up_38_flaw" type="Car" color="blue" route="up" departSpeed="desired" depart="3388" />
+</routes>
