@@ -14,7 +14,7 @@ class Vehicle_State(Enum):
     GAINING_PRIORITY = 2,
     WAITING = 3
 class Vehicle:
-
+# esta es una pequeña modificación
     def __init__(self, id, lane : Lane, config : SimStateAndConfig):
         self.id = id        
         self.config = config

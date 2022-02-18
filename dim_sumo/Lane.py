@@ -7,7 +7,7 @@ from SimStateAndConfig import SimStateAndConfig
 from Log import Log
 
 class Lane:
-
+# esto es una pequeña modificación
     def __init__(self, id, lane_length, config : SimStateAndConfig):
         self.config = config
         self.id = id
