@@ -438,7 +438,7 @@ def run_experiment(city_size=2, density_emergency=0.01, traffic_lights=False):
         for d in np.arange(0.1 * len(simulation_stats["flows"]), 1.1, 0.1):
             print("vamos a comenzar desde la densidad", d)
             print(simulation_stats)
-            density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo'), # para modificar la interfaz grafica
+            density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo-gui'), # para modificar la interfaz grafica
                                                                              "data/out-tripinfo.xml", dNS=0.0, dWE=0.0,
                                                                              pNS=d, pWE=d,
                                                                              pSN=d, pEW=d, pEmergency=density_emergency,
@@ -479,11 +479,11 @@ def main(options = None):
         sumoBinary = checkBinary('sumo-gui')
 
 
-    #new_d = 1
-    #density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo-gui'), "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=new_d, pWE=new_d,
-    #                                  pSN=new_d, pEW=new_d, pEmergency=0.09, pFlaw=0.0, traffic_lights=False, trafficlights_flaws=0.0, city_size=5)
-    #print(density_calc, flow, velocity)
-    run_experiment(city_size=5, density_emergency=0.01, traffic_lights=False)
+    new_d = 0.7
+    density_calc, flow, velocity = generate_traffic_and_execute_sumo(checkBinary('sumo-gui'), "data/out-tripinfo.xml", dNS=0.0, dWE=0.0, pNS=new_d, pWE=new_d,
+                                      pSN=new_d, pEW=new_d, pEmergency=0.01, pFlaw=0.0, traffic_lights=False, trafficlights_flaws=0.0, city_size=4)
+    print(density_calc, flow, velocity)
+    #run_experiment(city_size=4, density_emergency=0.01, traffic_lights=False)
 
 
 
